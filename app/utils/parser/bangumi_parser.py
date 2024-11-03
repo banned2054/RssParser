@@ -28,7 +28,12 @@ def fetch_bangumi(url) :
     headers = {
         'User-Agent' : config.get_setting('User-Agent')
     }
-    response = requests.request("GET", url, headers = headers)
+    proxy = config.get_config("proxy_url")
+    proxies = {
+        "http"  : proxy,
+        "https" : proxy
+    }
+    response = requests.request("GET", url, headers = headers, proxies = proxies)
     return True, response.text
 
 
