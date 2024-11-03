@@ -2,9 +2,15 @@ from sqlalchemy import Column, Date, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from app import config
 from app.models.bangumi_subject_info import BangumiSubjectInfo, BangumiType
 
 Base = declarative_base()
+
+# 设置 MySQL 数据库连接
+DATABASE_URL = f'mysql+pymysql://{config.mysql_username}:{config.REDACTED_MYSQL_PASSWORD}@{config.mysql_url}/anime'
+engine = create_engine(DATABASE_URL)
+Session = sessionmaker(bind = engine)
 
 
 class BangumiInfo(Base) :
@@ -17,11 +23,6 @@ class BangumiInfo(Base) :
     cn_name = Column(String)
     now_type = Column(Integer)
     pubdate = Column(Date)
-
-
-DATABASE_URL = 'sqlite:///data/anime.db'
-engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind = engine)
 
 
 class BangumiTable :

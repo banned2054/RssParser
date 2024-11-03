@@ -5,6 +5,7 @@ from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, create
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from app import config
 from app.models.mikan_rss_info import RssItemInfo
 
 Base = declarative_base()
@@ -25,7 +26,8 @@ class RssItem(Base) :
     version = Column(Integer)  # 添加的新列
 
 
-DATABASE_URL = 'sqlite:///data/rss.db'
+# 设置 MySQL 数据库连接
+DATABASE_URL = f'mysql+pymysql://{config.mysql_username}:{config.REDACTED_MYSQL_PASSWORD}@{config.mysql_url}/anime'
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind = engine)
 Base.metadata.create_all(engine)

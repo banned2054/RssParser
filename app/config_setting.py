@@ -20,6 +20,13 @@ class Config :
         self.filters = self.get_config("filter_words").split(",")
         self.get_bangumi_moe_subscription()
 
+        # 读取 MySQL 配置
+        with open('data/sql.json', 'r') as file :
+            sql_config = json.load(file)
+            self.mysql_url = sql_config['mysql_url']
+            self.mysql_username = sql_config['mysql_username']
+            self.REDACTED_MYSQL_PASSWORD = sql_config['REDACTED_MYSQL_PASSWORD']
+
     def get_config(self, key) :
         """
         获取config文件的信息
