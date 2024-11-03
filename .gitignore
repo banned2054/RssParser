@@ -1,0 +1,11 @@
+.vscode/
+venv/
+download/
+.idea/
+.venv/
+*/__pycache__/*.pyc
+*.pyc
+data/rss.db
+*.log
+test/
+test.py
