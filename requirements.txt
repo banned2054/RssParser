@@ -1,7 +1,7 @@
 pytz
 aiohttp
 qbittorrent-api
-bencodepy~=0.9.5
+bencodepy
 feedparser
 python-telegram-bot
 beautifulsoup4
