@@ -8,3 +8,4 @@ download/
 *.log
 test/
 test.py
+data/sql.json
