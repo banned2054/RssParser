@@ -19,8 +19,8 @@ qbt_client = qbittorrentapi.Client(
 logger = set_up_logger(__name__)
 
 
-async def send_notification(item_info):
-    try:
+async def send_notification(item_info) :
+    try :
         await send_message(
                 f"标题:{item_info.item_name}\n"
                 f"发布时间:{item_info.pub_date}\n"
@@ -28,11 +28,11 @@ async def send_notification(item_info):
                 f"mikan地址:{config.mikan_episode}{item_info.mikan_url}\n"
                 f"bgm地址:https://bgm.tv/subject/{item_info.bangumi_id}"
         )
-    except Exception as e:
+    except Exception as e :
         logger.error(e)
 
 
-def is_torrent_complete_and_matching(torrent_hash, expected_name):
+def is_torrent_complete_and_matching(torrent_hash, expected_name) :
     """
     判断hash值和name是否相匹配，并且该torrent是否下载完成
 
@@ -40,14 +40,14 @@ def is_torrent_complete_and_matching(torrent_hash, expected_name):
     :param str expected_name: The expected name of the torrent
     :return tuple[bool, str]: 当hash值和name相匹配，而且该torrent下载完成，返回ture，否则返回false
     """
-    try:
+    try :
         torrent_info = qbt_client.torrents_info(torrent_hashes = torrent_hash)[0]
-        if torrent_info.name != expected_name:
+        if torrent_info.name != expected_name :
             logger.error(
                     f"hash:{torrent_hash}, this torrent's name is not {expected_name}"
             )
             return False, "Don't match"
-        if torrent_info.progress < 1:
+        if torrent_info.progress < 1 :
             logger.error(f"hash:{torrent_hash}, this torrent is not download complete")
             return False, "Download not complete"
 
@@ -55,7 +55,7 @@ def is_torrent_complete_and_matching(torrent_hash, expected_name):
                 f"hash:{torrent_hash}, name: {expected_name}, this torrent download complete"
         )
         return True, "Download complete"
-    except IndexError:
+    except IndexError :
         logger.error(f"hash:{torrent_hash}, this torrent has some error unusual")
         return False, "Other error"
 
@@ -68,7 +68,7 @@ async def download_one_file(
         file_name,
         tag,
         item_info,
-):
+) :
     """
     添加种子到qbittorrent
     :param new_torrent_name:
@@ -80,9 +80,9 @@ async def download_one_file(
     :param str tag:
     :return:
     """
-    try:
+    try :
         now_len = get_torrent_file_len(torrent_path)
-        if now_len > 1:
+        if now_len > 1 :
             await send_message('出现多文件:\n'
                                f'标题：{clear_title(item_info.origin_name)}\n'
                                f'链接:https://mikanani.me/Home/Episode/{item_info.mikan_url}')
@@ -94,9 +94,9 @@ async def download_one_file(
 
         await send_notification(item_info)
         start_torrent_list = {
-            torrent.hash: torrent for torrent in qbt_client.torrents_info()
+            torrent.hash : torrent for torrent in qbt_client.torrents_info()
         }
-        with open(torrent_path, "rb") as f:
+        with open(torrent_path, "rb") as f :
             torrent_content = f.read()
         # 一开始就暂停下载，方便改名字
         qbt_client.torrents_add(
@@ -104,12 +104,12 @@ async def download_one_file(
         )
         await asyncio.sleep(2)
         end_torrent_list = {
-            torrent.hash: torrent for torrent in qbt_client.torrents_info()
+            torrent.hash : torrent for torrent in qbt_client.torrents_info()
         }
         # 获取最新添加的torrent
         new_torrents = set(end_torrent_list) - set(start_torrent_list)
         # 检查new_torrents是否为空
-        if not new_torrents:
+        if not new_torrents :
             logger.info("torrent已添加")
             await torrent_already_add(
                     torrent_path,
@@ -131,7 +131,7 @@ async def download_one_file(
                 tag,
                 item_info
         )
-    except Exception as e:
+    except Exception as e :
         error_str = str(e)
         tb = traceback.extract_tb(e.__traceback__)
         filename = tb[-1].filename
@@ -141,30 +141,30 @@ async def download_one_file(
         )
 
 
-def get_torrent_info(specific_name):
+def get_torrent_info(specific_name) :
     # 获取所有torrents的信息
     all_torrents = qbt_client.torrents_info()
     # 遍历所有torrents，查找与指定名称匹配的torrent
     target_torrent = None
-    for torrent in all_torrents:
-        if torrent.name == specific_name:
+    for torrent in all_torrents :
+        if torrent.name == specific_name :
             target_torrent = torrent
             break
-    if target_torrent:
+    if target_torrent :
         return True, target_torrent.info
-    else:
+    else :
         return False, None
 
 
 async def torrent_already_add(
         torrent_path, new_torrent_name, dir_name, file_name, tag, item_info
-):
+) :
     specific_info = get_torrent_info(new_torrent_name)
-    if not specific_info[0]:
+    if not specific_info[0] :
         return
     # 假设 torrent 的信息中包含了一个名为 'hash' 的属性
     torrent_hash = specific_info[1].get("hash") if specific_info[1] else None
-    if torrent_hash:
+    if torrent_hash :
         await after_add_torrent(
                 torrent_path,
                 torrent_hash,
@@ -175,7 +175,7 @@ async def torrent_already_add(
                 item_info,
         )
     # 可能还需要处理 torrent_hash 为空的情况
-    if not RssItemTable.check_item_exist(item_info.mikan_url):
+    if not RssItemTable.check_item_exist(item_info.mikan_url) :
         RssItemTable.insert_rss_data(item_info, torrent_hash)
 
 
@@ -187,7 +187,7 @@ async def after_add_torrent(
         file_name,
         tag,
         item_info,
-):
+) :
     # 重命名qbittorrent里的种子名
     qbt_client.torrents_rename(
             torrent_hash = torrent_hash, new_torrent_name = new_torrent_name
@@ -195,7 +195,7 @@ async def after_add_torrent(
     logger.debug(f"Torrent rename: {new_torrent_name}.")
     # 更改文件名
     files = qbt_client.torrents_files(torrent_hash = torrent_hash)
-    if dir_name[-1] == "/":
+    if dir_name[-1] == "/" :
         dir_name = dir_name[:-1]
     new_file_name = f'{dir_name}/{file_name}.{files[0].name.split(".")[-1]}'
     qbt_client.torrents_rename_file(
@@ -216,13 +216,13 @@ async def after_add_torrent(
     remove_file(torrent_path)
 
 
-async def get_setting():
+async def get_setting() :
     result = qbt_client.app_preferences()
     return result["autorun_program"]
 
 
-def get_torrent_file_len(torrent_path):
-    with open(torrent_path, "rb") as f:
+def get_torrent_file_len(torrent_path) :
+    with open(torrent_path, "rb") as f :
         # 解码torrent文件
         decoded_data = bencodepy.decode(f.read())
 
@@ -233,37 +233,37 @@ def get_torrent_file_len(torrent_path):
         # 获取info字段
         info = torrent_data.get(b"info")
 
-        if not info:
+        if not info :
             raise ValueError("Invalid torrent file: 'info' field not found.")
 
         # 检查是否是单文件还是多文件torrent
-        if b"files" in info:
+        if b"files" in info :
             # 多文件torrent
             return len(info[b"files"])
-        else:
+        else :
             # 单文件torrents
             return 1
 
 
-def check_torrent_finish_download(torrent_hash):
-    try:
+def check_torrent_finish_download(torrent_hash) :
+    try :
         # Fetch torrent info
         torrent_info = qbt_client.torrents_info(hashes = torrent_hash)
 
         # If no torrent found with the given hash
-        if not torrent_info:
+        if not torrent_info :
             print(f"No torrent found with hash: {torrent_hash}")
             return False
 
         # Check if the torrent is completed
-        if torrent_info[0].state == "uploading" or torrent_info[0].progress == 1:
+        if torrent_info[0].state == "uploading" or torrent_info[0].progress == 1 :
             return True
-        else:
+        else :
             return False
 
-    except qbittorrentapi.exceptions.LoginFailed:
+    except qbittorrentapi.exceptions.LoginFailed :
         print("Login failed! Please check your qBittorrent credentials.")
         return False
-    except Exception as e:
+    except Exception as e :
         print(f"An error occurred: {e}")
         return False

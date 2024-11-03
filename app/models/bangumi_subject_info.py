@@ -3,13 +3,13 @@ from datetime import date
 from enum import Enum
 
 
-class BangumiType(Enum):
+class BangumiType(Enum) :
     Anime = 2
     TokuSaTsu = 6
 
 
 @dataclass
-class BangumiSubjectInfo:
+class BangumiSubjectInfo :
     id: int
     platform: str
     image_url: str

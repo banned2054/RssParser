@@ -7,19 +7,19 @@ from app.utils.qbittorrent_utils import check_torrent_finish_download
 from app.utils.telegram_utils import send_message_to_channel
 
 
-async def handle_single_download(unfinished_download_hash):
+async def handle_single_download(unfinished_download_hash) :
     """处理单个下载项"""
     result = check_torrent_finish_download(unfinished_download_hash)
-    if not result:
+    if not result :
         return
     item_info_result = RssItemTable.get_item_info_by_hash(unfinished_download_hash)
-    if not item_info_result[0]:
+    if not item_info_result[0] :
         return
     await send_download_complete_message(item_info_result[1])
     RssItemTable.finish_item_download(unfinished_download_hash)
 
 
-async def send_download_complete_message(item):
+async def send_download_complete_message(item) :
     """发送下载完成的消息"""
     bangumi_subject_id = item.bangumi_id
     name_cn = BangumiTable.get_anime_name_by_id(bangumi_subject_id)[1]
@@ -35,10 +35,10 @@ async def send_download_complete_message(item):
     )
 
 
-async def check_unfinished_downloads_every_minute():
+async def check_unfinished_downloads_every_minute() :
     """每分钟检查未完成的下载"""
-    while True:
+    while True :
         unfinished_download_hash_list = RssItemTable.get_not_finished_download_item()
-        for unfinished_download_hash in unfinished_download_hash_list:
+        for unfinished_download_hash in unfinished_download_hash_list :
             await handle_single_download(unfinished_download_hash)
         time.sleep(60)

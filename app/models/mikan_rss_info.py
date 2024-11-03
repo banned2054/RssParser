@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 @dataclass
-class RssItemInfo:
+class RssItemInfo :
     item_name: str
     anime_name: str
     origin_name: str

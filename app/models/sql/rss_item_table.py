@@ -10,7 +10,7 @@ from app.models.mikan_rss_info import RssItemInfo
 Base = declarative_base()
 
 
-class RssItem(Base):
+class RssItem(Base) :
     __tablename__ = 'rss_item'
 
     item_name = Column(String)
@@ -31,17 +31,17 @@ Session = sessionmaker(bind = engine)
 Base.metadata.create_all(engine)
 
 
-class RssItemTable:
+class RssItemTable :
     """
     用来处理和rss相关的数据库的类
     """
 
     @staticmethod
-    def insert_rss_data(item_info, hash_code, download_finish = False):
+    def insert_rss_data(item_info, hash_code, download_finish = False) :
         session = Session()
 
         # 确保pub_date是datetime对象
-        if isinstance(item_info.pub_date, str):
+        if isinstance(item_info.pub_date, str) :
             item_info.pub_date = datetime.fromisoformat(item_info.pub_date)
 
         new_item = RssItem(
@@ -61,21 +61,21 @@ class RssItemTable:
         session.close()
 
     @staticmethod
-    def check_item_exist(mikan_url):
+    def check_item_exist(mikan_url) :
         session = Session()
         exists = session.query(RssItem).filter(RssItem.mikan_url == mikan_url).count() > 0
         session.close()
         return exists
 
     @staticmethod
-    def get_bangumi_id_by_anime_name(anime_name):
+    def get_bangumi_id_by_anime_name(anime_name) :
         session = Session()
         result = session.query(RssItem.bangumi_id).filter(RssItem.anime_name == anime_name).distinct().first()
         session.close()
         return result.bangumi_id if result else -1
 
     @staticmethod
-    def get_not_finished_download_item():
+    def get_not_finished_download_item() :
         session = Session()
         unfinished_downloads = [item.torrent_hash for item in
                                 session.query(RssItem).filter(RssItem.download_finish == False).all()]
@@ -83,19 +83,19 @@ class RssItemTable:
         return unfinished_downloads
 
     @staticmethod
-    def finish_item_download(hash_code):
+    def finish_item_download(hash_code) :
         session = Session()
         item = session.query(RssItem).filter(RssItem.torrent_hash == hash_code).first()
-        if item:
+        if item :
             item.download_finish = True
             session.commit()
         session.close()
 
     @staticmethod
-    def get_item_info_by_hash(hash_code):
+    def get_item_info_by_hash(hash_code) :
         session = Session()
         item = session.query(RssItem).filter(RssItem.torrent_hash == hash_code).first()
-        if item:
+        if item :
             item_info = RssItemInfo(
                     item_name = item.item_name,
                     anime_name = item.anime_name,
@@ -109,16 +109,16 @@ class RssItemTable:
             )
             session.close()
             return True, item_info
-        else:
+        else :
             session.close()
             return False, None
 
     @staticmethod
-    def get_latest_episode_torrent(bangumi_id: int, episode: float):
+    def get_latest_episode_torrent(bangumi_id: int, episode: float) :
         session = Session()
         item = session.query(RssItem).filter(RssItem.bangumi_id == bangumi_id, RssItem.episode == episode).order_by(
                 RssItem.pub_date.desc()).first()
-        if item:
+        if item :
             item_info = RssItemInfo(
                     item_name = item.item_name,
                     anime_name = item.anime_name,
@@ -132,6 +132,6 @@ class RssItemTable:
             )
             session.close()
             return item_info
-        else:
+        else :
             session.close()
             return None

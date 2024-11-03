@@ -14,22 +14,22 @@ RULES = [
 ]
 
 SUBTITLE_LANG = {
-    "zh-tc"       : ["tc", "cht", "繁体", "繁日", "繁中", "zh-tw", "big5", "baha"],
-    "zh-sc"       : ["sc", "chs", "简体", "简日", "简中", "zh", "gb"],
-    "zh-sc-and-tc": ["繁简", "简繁"],
+    "zh-tc"        : ["tc", "cht", "繁体", "繁日", "繁中", "zh-tw", "big5", "baha"],
+    "zh-sc"        : ["sc", "chs", "简体", "简日", "简中", "zh", "gb"],
+    "zh-sc-and-tc" : ["繁简", "简繁"],
 }
 
 
-def get_subtitle_language(subtitle_name: str) -> str:
-    if subtitle_name.lower().__contains__('baha'):
+def get_subtitle_language(subtitle_name: str) -> str :
+    if subtitle_name.lower().__contains__('baha') :
         return 'baha'
-    for key, value in SUBTITLE_LANG.items():
-        for v in value:
-            if v in subtitle_name.lower():
+    for key, value in SUBTITLE_LANG.items() :
+        for v in value :
+            if v in subtitle_name.lower() :
                 return key
 
 
-def clear_title(origin_title):
+def clear_title(origin_title) :
     """
     清理标题中的特定模式，保留重要信息
     :param str origin_title: 原始标题
@@ -47,32 +47,32 @@ def clear_title(origin_title):
     return result.strip()
 
 
-def get_title_first_step(origin_title):
+def get_title_first_step(origin_title) :
     cleared_title = clear_title(origin_title)
     n = re.split(r"[\[\]()【】（）]", cleared_title)
-    while "" in n:
+    while "" in n :
         n.remove("")
-    if len(n) > 1:
-        if re.match(r"\d+", n[1]):
+    if len(n) > 1 :
+        if re.match(r"\d+", n[1]) :
             return cleared_title
         return n[1]
-    else:
+    else :
         return n[0]
 
 
-def get_title(origin_title):
+def get_title(origin_title) :
     """
     从rss里item的name解析到动画的文件名
     :param str origin_title: item的name
     :return str: 动画的文件名
     """
     contains_list = config.get_config("contain_filter").split("|")
-    for contain_word in contains_list:
-        if not origin_title.lower().__contains__(contain_word):
+    for contain_word in contains_list :
+        if not origin_title.lower().__contains__(contain_word) :
             return ""
-    for rule in RULES:
+    for rule in RULES :
         match_obj = re.match(rule, origin_title, re.I)
-        if not match_obj or match_obj.group(1) == "":
+        if not match_obj or match_obj.group(1) == "" :
             continue
         origin_title = get_title_first_step(match_obj.group(1)).strip()
         title = origin_title.split("/")[0]
@@ -81,18 +81,18 @@ def get_title(origin_title):
     return ""
 
 
-def get_episode(origin_title):
+def get_episode(origin_title) :
     """
     从rss里item的name解析到动画的两个集数和版本号
     :param str origin_title: item的name
     :return tuple: 动画的两个集数和版本号 (集数1, 版本号1, 集数2, 版本号2)
     """
     cleared_title = clear_title(origin_title)
-    for rule in RULES:
-        if not cleared_title:
+    for rule in RULES :
+        if not cleared_title :
             continue
         match_obj = re.match(rule, cleared_title, re.I)
-        if not match_obj:
+        if not match_obj :
             continue
 
         episode1 = match_obj.group(2)
@@ -100,10 +100,10 @@ def get_episode(origin_title):
 
         # 匹配第二个集数和版本号
         episode2_match = re.search(r'-(\d{1,4})(?:v(\d{1,2}))?', match_obj.group(0))
-        if episode2_match:
+        if episode2_match :
             episode2 = episode2_match.group(1)
             version2 = episode2_match.group(2) if episode2_match.group(2) else 1
-        else:
+        else :
             episode2 = -1
             version2 = -1
 
@@ -111,7 +111,7 @@ def get_episode(origin_title):
     return -1, -1, -1, -1
 
 
-def universal_replace_name(target, anime_info, episode = None):
+def universal_replace_name(target, anime_info, episode = None) :
     """
     :param str target:
     :param BangumiSubjectInfo anime_info:
@@ -119,27 +119,27 @@ def universal_replace_name(target, anime_info, episode = None):
     :return:
     """
     name = config.get_config(target)
-    if name.__contains__("/year/"):
+    if name.__contains__("/year/") :
         year = anime_info.pub_date.year
         year_str = f"{year:04d}"
         name = name.replace("/year/", year_str)
-    if name.__contains__("/month/"):
+    if name.__contains__("/month/") :
         month = anime_info.pub_date.month
         month_str = f"{month:02d}"
         name = name.replace("/month/", month_str)
-    if name.__contains__("/day/"):
+    if name.__contains__("/day/") :
         day = anime_info.pub_date.day
         day_str = f"{day:02d}"
         name = name.replace("/month/", day_str)
-    if name.__contains__("/episode/") and episode is not None:
+    if name.__contains__("/episode/") and episode is not None :
         # 分解 episode 为整数部分和小数部分
         int_part = int(episode)
         frac_part = episode - int_part
 
         # 格式化整数部分和小数部分
-        if frac_part == 0:
+        if frac_part == 0 :
             episode_str = f"{int_part:02d}"
-        else:
+        else :
             episode_str = f"{int_part:02d}.{int(frac_part * 10)}"  # 假设小数部分只有一位
         name = name.replace("/episode/", episode_str)
     name = name.replace("/cn_name/", anime_info.cn_name)
@@ -150,7 +150,7 @@ def universal_replace_name(target, anime_info, episode = None):
     return name
 
 
-def clear_title_for_tag(origin_title: str):
+def clear_title_for_tag(origin_title: str) :
     result = origin_title.replace(' ', '_')
     result = result.replace('：', '_')
     result = result.replace(':', '_')
@@ -181,8 +181,8 @@ def clear_title_for_tag(origin_title: str):
     result = result.replace('】', '')
     result = result.replace('）', '')
 
-    while result.__contains__('__'):
+    while result.__contains__('__') :
         result = result.replace('__', '_')
-    while result.endswith('_'):
+    while result.endswith('_') :
         result = result.replace('_', '')
     return result

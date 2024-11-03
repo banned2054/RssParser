@@ -7,7 +7,7 @@ from app.models.bangumi_subject_info import BangumiSubjectInfo, BangumiType
 Base = declarative_base()
 
 
-class BangumiInfo(Base):
+class BangumiInfo(Base) :
     __tablename__ = 'bangumi_info'
 
     bangumi_id = Column(Integer, primary_key = True, nullable = False)
@@ -24,18 +24,18 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind = engine)
 
 
-class BangumiTable:
+class BangumiTable :
     """
     用来处理和bangumi相关的数据库的类
     """
 
     @staticmethod
-    def create_bangumi_table_if_not_exists():
+    def create_bangumi_table_if_not_exists() :
         Base.metadata.create_all(engine)
 
     @staticmethod
     def insert_bangumi_data(
-            bangumi_subject_info: BangumiSubjectInfo):
+            bangumi_subject_info: BangumiSubjectInfo) :
         """
         插入一行数据
         """
@@ -55,12 +55,12 @@ class BangumiTable:
         session.close()
 
     @staticmethod
-    def get_anime_info_by_id(bangumi_id: int):
+    def get_anime_info_by_id(bangumi_id: int) :
         BangumiTable.create_bangumi_table_if_not_exists()
         session = Session()
         result = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first()
         session.close()
-        if result:
+        if result :
             bangumi_info = BangumiSubjectInfo(
                     id = result.bangumi_id,
                     platform = result.platform,
@@ -71,23 +71,23 @@ class BangumiTable:
                     pub_date = result.pubdate
             )
             return True, bangumi_info
-        else:
+        else :
             return False, None
 
     @staticmethod
-    def get_anime_name_by_id(bangumi_id: int):
+    def get_anime_name_by_id(bangumi_id: int) :
         BangumiTable.create_bangumi_table_if_not_exists()
         session = Session()
         result = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first()
         session.close()
-        if result:
+        if result :
             cn_name = result.cn_name
             return True, cn_name
-        else:
+        else :
             return False, None
 
     @staticmethod
-    def check_anime_exists(bangumi_id: int):
+    def check_anime_exists(bangumi_id: int) :
         BangumiTable.create_bangumi_table_if_not_exists()
         session = Session()
         exists = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first() is not None
