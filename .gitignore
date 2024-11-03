@@ -9,3 +9,4 @@ download/
 test/
 test.py
 data/sql.json
+*.sh
