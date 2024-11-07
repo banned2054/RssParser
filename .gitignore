@@ -10,4 +10,3 @@ test/
 test.py
 data/sql.json
 *.sh
-data/config.json
