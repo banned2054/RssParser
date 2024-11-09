@@ -11,8 +11,8 @@ from app.utils.parser.bangumi_parser import get_subject_info
 from app.utils.parser.mikan_parser import get_anime_home_url_from_mikan, get_bangumi_url_from_mikan
 from app.utils.parser.title_parser import get_episode, get_subtitle_language, get_title, \
     universal_replace_name
-from app.utils.qbittorrent_utils import download_one_file
 from app.utils.time_utils import datetime_to_str, struct_time_to_datetime
+from app.utils.torrent.qbittorrent_utils import download_one_file
 
 logger = set_up_logger(__name__)
 

@@ -10,6 +10,7 @@ from app.utils.file_utils import remove_file
 from app.utils.log_utils import set_up_logger
 from app.utils.parser.title_parser import clear_title
 from app.utils.telegram_utils import send_message
+from app.utils.torrent.torrent_utils import get_torrent_info_hash
 
 qbt_client = qbittorrentapi.Client(
         host = config.get_config("qbittorrent_url"),
@@ -81,6 +82,20 @@ async def download_one_file(
     :return:
     """
     try :
+        torrent_hash = get_torrent_info_hash(torrent_path)
+        flag = check_torrent_exist(torrent_hash)
+        if flag :
+            logger.info("torrent已添加")
+            await torrent_already_add(
+                    torrent_hash,
+                    torrent_path,
+                    new_torrent_name,
+                    dir_name,
+                    file_name,
+                    tag,
+                    item_info
+            )
+            return
         now_len = get_torrent_file_len(torrent_path)
         if now_len > 1 :
             await send_message('出现多文件:\n'
@@ -93,9 +108,7 @@ async def download_one_file(
             )
 
         await send_notification(item_info)
-        start_torrent_list = {
-            torrent.hash : torrent for torrent in qbt_client.torrents_info()
-        }
+
         with open(torrent_path, "rb") as f :
             torrent_content = f.read()
         # 一开始就暂停下载，方便改名字
@@ -103,24 +116,7 @@ async def download_one_file(
                 torrent_files = torrent_content, savepath = save_path, is_paused = True
         )
         await asyncio.sleep(2)
-        end_torrent_list = {
-            torrent.hash : torrent for torrent in qbt_client.torrents_info()
-        }
-        # 获取最新添加的torrent
-        new_torrents = set(end_torrent_list) - set(start_torrent_list)
-        # 检查new_torrents是否为空
-        if not new_torrents :
-            logger.info("torrent已添加")
-            await torrent_already_add(
-                    torrent_path,
-                    new_torrent_name,
-                    dir_name,
-                    file_name,
-                    tag,
-                    item_info
-            )
-            return
-        torrent_hash = new_torrents.pop()
+
         logger.info(f"torrent添加成功，hash:{torrent_hash}")
         await after_add_torrent(
                 torrent_path,
@@ -157,23 +153,20 @@ def get_torrent_info(specific_name) :
 
 
 async def torrent_already_add(
-        torrent_path, new_torrent_name, dir_name, file_name, tag, item_info
+        torrent_hash, torrent_path, new_torrent_name, dir_name, file_name, tag, item_info
 ) :
     specific_info = get_torrent_info(new_torrent_name)
     if not specific_info[0] :
         return
-    # 假设 torrent 的信息中包含了一个名为 'hash' 的属性
-    torrent_hash = specific_info[1].get("hash") if specific_info[1] else None
-    if torrent_hash :
-        await after_add_torrent(
-                torrent_path,
-                torrent_hash,
-                new_torrent_name,
-                dir_name,
-                file_name,
-                tag,
-                item_info,
-        )
+    await after_add_torrent(
+            torrent_path,
+            torrent_hash,
+            new_torrent_name,
+            dir_name,
+            file_name,
+            tag,
+            item_info,
+    )
     # 可能还需要处理 torrent_hash 为空的情况
     if not RssItemTable.check_item_exist(item_info.mikan_url) :
         RssItemTable.insert_rss_data(item_info, torrent_hash)
@@ -266,4 +259,17 @@ def check_torrent_finish_download(torrent_hash) :
         return False
     except Exception as e :
         print(f"An error occurred: {e}")
+        return False
+
+
+def check_torrent_exist(torrent_hash) :
+    try :
+        # 尝试获取 torrent 的信息
+        torrent_info = qbt_client.torrents_info(torrent_hashes = torrent_hash)
+
+        if torrent_info :
+            return True
+        else :
+            return False
+    except Exception as e :
         return False

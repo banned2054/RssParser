@@ -4,8 +4,8 @@ from app import config
 from app.models.sql import BangumiTable, RssItemTable
 from app.utils.log_utils import set_up_logger
 from app.utils.parser.title_parser import clear_title, clear_title_for_tag
-from app.utils.qbittorrent_utils import check_torrent_finish_download
 from app.utils.telegram_utils import send_message_to_channel
+from app.utils.torrent.qbittorrent_utils import check_torrent_finish_download
 
 logger = set_up_logger(__name__)
 
