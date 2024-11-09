@@ -56,7 +56,8 @@ def contains_any(main_str, str_list) :
 
 async def analyze_item(item) :
     item_title = item.title
-    if should_skip_item(item_title) :
+    should_skip, now_language = should_skip_item(item_title)
+    if should_skip :
         return
 
     origin_title = get_title(item_title)
@@ -87,14 +88,13 @@ async def analyze_item(item) :
         anime_info, item_info = await process_existing_bangumi_item(item, item_title, mikan_url, bangumi_subject_id)
 
     latest = RssItemTable.get_latest_episode_torrent(anime_info.id, episode1)
-    now_language = get_subtitle_language(item_title)
     if now_language == 'baha' and latest is not None :
         return
 
     torrent_result = await download_mikan_torrent(item)
     if not torrent_result[0] :
         return
-    await download_and_notify(torrent_result[1], anime_info, item_info)
+    await download_and_notify(torrent_result[1], anime_info, item_info, now_language)
 
 
 def should_skip_item(item_title) :
@@ -102,18 +102,18 @@ def should_skip_item(item_title) :
     判断是否有filter的内容、以及语言是否正确
     """
     if contains_any(item_title, config.filters) :
-        return True
+        return True, None
 
     now_language = get_subtitle_language(item_title)
     target_language = config.get_config("subtitle_language")
 
     if now_language == 'baha' :
-        return False
+        return False, 'baha'
 
     if now_language != target_language :
-        return True
+        return True, None
 
-    return False
+    return False, now_language
 
 
 async def get_bangumi_url(item) :
@@ -159,11 +159,15 @@ async def process_existing_bangumi_item(item, item_title, torrent_page_url, bang
     return anime_info[1], item_info
 
 
-async def download_and_notify(torrent_path, anime_info, item_info) :
+async def download_and_notify(torrent_path, anime_info, item_info, now_language) :
     save_path = determine_save_path(anime_info)
     dir_name = universal_replace_name("dir_name", anime_info)
     file_name = universal_replace_name("file_name", anime_info, item_info.episode)
     new_torrent_name = universal_replace_name("qbittorrent_name", anime_info, item_info.episode)
+    if now_language == 'baha' :
+        new_torrent_name += ' BAHA'
+    else :
+        new_torrent_name += ' Mikan'
 
     await download_one_file(torrent_path, new_torrent_name, save_path, dir_name, file_name, "mikan", item_info)
 
