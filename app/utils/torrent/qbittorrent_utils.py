@@ -137,27 +137,9 @@ async def download_one_file(
         )
 
 
-def get_torrent_info(specific_name) :
-    # 获取所有torrents的信息
-    all_torrents = qbt_client.torrents_info()
-    # 遍历所有torrents，查找与指定名称匹配的torrent
-    target_torrent = None
-    for torrent in all_torrents :
-        if torrent.name == specific_name :
-            target_torrent = torrent
-            break
-    if target_torrent :
-        return True, target_torrent.info
-    else :
-        return False, None
-
-
 async def torrent_already_add(
         torrent_hash, torrent_path, new_torrent_name, dir_name, file_name, tag, item_info
 ) :
-    specific_info = get_torrent_info(new_torrent_name)
-    if not specific_info[0] :
-        return
     await after_add_torrent(
             torrent_path,
             torrent_hash,
