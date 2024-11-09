@@ -28,7 +28,11 @@ class RssItem(Base) :
 
 # 设置 MySQL 数据库连接
 DATABASE_URL = f'mysql+pymysql://{config.mysql_username}:{config.REDACTED_MYSQL_PASSWORD}@{config.mysql_url}/anime'
-engine = create_engine(DATABASE_URL)
+engine = create_engine(
+        DATABASE_URL,
+        pool_recycle = 1800,  # 30 分钟后重新回收连接
+        pool_pre_ping = True  # 在使用前检查连接是否可用
+)
 Session = sessionmaker(bind = engine)
 Base.metadata.create_all(engine)
 
