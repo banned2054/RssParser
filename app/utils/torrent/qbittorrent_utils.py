@@ -1,7 +1,6 @@
 import asyncio
 import traceback
 
-import bencodepy
 import qbittorrentapi
 
 from app import config
@@ -10,7 +9,7 @@ from app.utils.file_utils import remove_file
 from app.utils.log_utils import set_up_logger
 from app.utils.parser.title_parser import clear_title
 from app.utils.telegram_utils import send_message
-from app.utils.torrent.torrent_utils import get_torrent_info_hash
+from app.utils.torrent.torrent_utils import get_torrent_file_len, get_torrent_info_hash
 
 qbt_client = qbittorrentapi.Client(
         host = config.get_config("qbittorrent_url"),
@@ -163,78 +162,82 @@ async def after_add_torrent(
         tag,
         item_info,
 ) :
-    # 重命名qbittorrent里的种子名
-    qbt_client.torrents_rename(
-            torrent_hash = torrent_hash, new_torrent_name = new_torrent_name
-    )
-    logger.debug(f"Torrent rename: {new_torrent_name}.")
-    # 更改文件名
-    files = qbt_client.torrents_files(torrent_hash = torrent_hash)
-    if dir_name[-1] == "/" :
-        dir_name = dir_name[:-1]
-    new_file_name = f'{dir_name}/{file_name}.{files[0].name.split(".")[-1]}'
-    qbt_client.torrents_rename_file(
-            torrent_hash = torrent_hash, file_id = 0, new_file_name = new_file_name
-    )
-    logger.debug(f"Torrent file rename: {new_file_name}.")
-    qbt_client.torrents_add_tags(torrent_hashes = torrent_hash, tags = tag)
-    logger.debug(f"Torrent add tags.")
-    # 重新检查文件是否下载完成
-    qbt_client.torrents_recheck(torrent_hash)
-    logger.debug(f"Torrent rechecked.")
-    await asyncio.sleep(10)
-    # 继续下载
-    qbt_client.torrents_resume(torrent_hash)
-    logger.debug(f"Torrent resume.")
-    qbt_client.torrents_reannounce(torrent_hashes = torrent_hash)
-    RssItemTable.insert_rss_data(item_info, torrent_hash)
-    remove_file(torrent_path)
-
-
-async def get_setting() :
-    result = qbt_client.app_preferences()
-    return result["autorun_program"]
-
-
-def get_torrent_file_len(torrent_path) :
-    with open(torrent_path, "rb") as f :
-        # 解码torrent文件
-        decoded_data = bencodepy.decode(f.read())
-
-        # 断言解码后的数据是一个字典
-        assert isinstance(decoded_data, dict), "Decoded data is not a dictionary"
-        torrent_data = dict(decoded_data)
-
-        # 获取info字段
-        info = torrent_data.get(b"info")
-
-        if not info :
-            raise ValueError("Invalid torrent file: 'info' field not found.")
-
-        # 检查是否是单文件还是多文件torrent
-        if b"files" in info :
-            # 多文件torrent
-            return len(info[b"files"])
-        else :
-            # 单文件torrents
-            return 1
+    try :
+        # 重命名qbittorrent里的种子名
+        qbt_client.torrents_rename(
+                torrent_hash = torrent_hash, new_torrent_name = new_torrent_name
+        )
+        logger.debug(f"Torrent rename: {new_torrent_name}.")
+        # 更改文件名
+        files = qbt_client.torrents_files(torrent_hash = torrent_hash)
+        if dir_name[-1] == "/" :
+            dir_name = dir_name[:-1]
+        new_file_name = f'{dir_name}/{file_name}.{files[0].name.split(".")[-1]}'
+        qbt_client.torrents_rename_file(
+                torrent_hash = torrent_hash, file_id = 0, new_file_name = new_file_name
+        )
+        logger.debug(f"Torrent file rename: {new_file_name}.")
+        qbt_client.torrents_add_tags(torrent_hashes = torrent_hash, tags = tag)
+        logger.debug(f"Torrent add tags.")
+        # 重新检查文件是否下载完成
+        qbt_client.torrents_recheck(torrent_hash)
+        logger.debug(f"Torrent rechecked.")
+        status = get_torrent_status(torrent_hash)
+        while status.startswith('checking') :
+            await asyncio.sleep(1)
+            status = get_torrent_status(torrent_hash)
+        # 继续下载
+        qbt_client.torrents_resume(torrent_hash)
+        logger.debug(f"Torrent resume.")
+        qbt_client.torrents_reannounce(torrent_hashes = torrent_hash)
+        RssItemTable.insert_rss_data(item_info, torrent_hash)
+        remove_file(torrent_path)
+    except :
+        pass
 
 
 def check_torrent_finish_download(torrent_hash) :
     try :
-        # Fetch torrent info
-        torrent_info = qbt_client.torrents_info(hashes = torrent_hash)
+        state = get_torrent_status(torrent_hash)
+        progress = get_torrent_progress(torrent_hash)
 
-        # If no torrent found with the given hash
-        if not torrent_info :
-            print(f"No torrent found with hash: {torrent_hash}")
-            return False
-
-        # Check if the torrent is completed
-        if torrent_info[0].state == "uploading" or torrent_info[0].progress == 1 :
+        if state == "uploading" or progress == 1 :
             return True
         else :
             return False
+
+    except Exception as e :
+        print(f"An error occurred: {e}")
+        return False
+
+
+def get_torrent_progress(torrent_hash) :
+    try :
+        torrent_info = qbt_client.torrents_info(hashes = torrent_hash)
+
+        if not torrent_info :
+            print(f"No torrent found with hash: {torrent_hash}")
+            raise Exception(f'torrent: {torrent_hash} not find')
+
+        return torrent_info[0].progress
+
+    except qbittorrentapi.exceptions.LoginFailed :
+        print("Login failed! Please check your qBittorrent credentials.")
+        return False
+    except Exception as e :
+        print(f"An error occurred: {e}")
+        return False
+
+
+def get_torrent_status(torrent_hash) :
+    try :
+        torrent_info = qbt_client.torrents_info(hashes = torrent_hash)
+
+        if not torrent_info :
+            print(f"No torrent found with hash: {torrent_hash}")
+            raise Exception(f'torrent: {torrent_hash} not find')
+
+        return torrent_info[0].state
 
     except qbittorrentapi.exceptions.LoginFailed :
         print("Login failed! Please check your qBittorrent credentials.")
