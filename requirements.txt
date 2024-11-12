@@ -8,3 +8,4 @@ beautifulsoup4
 SQLAlchemy
 requests
 pymysql
+cryptography
