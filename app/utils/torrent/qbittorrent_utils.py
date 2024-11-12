@@ -187,13 +187,17 @@ async def after_add_torrent(
             await asyncio.sleep(1)
             status = get_torrent_status(torrent_hash)
         # 继续下载
-        qbt_client.torrents_resume(torrent_hash)
+        resume_torrent(torrent_hash)
         logger.debug(f"Torrent resume.")
         qbt_client.torrents_reannounce(torrent_hashes = torrent_hash)
         RssItemTable.insert_rss_data(item_info, torrent_hash)
         remove_file(torrent_path)
     except :
         pass
+
+
+def resume_torrent(torrent_hash) :
+    qbt_client.torrents_resume(torrent_hash)
 
 
 def check_torrent_finish_download(torrent_hash) :

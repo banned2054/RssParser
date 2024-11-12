@@ -5,7 +5,7 @@ from app.models.sql import BangumiTable, RssItemTable
 from app.utils.log_utils import set_up_logger
 from app.utils.parser.title_parser import clear_title, clear_title_for_tag
 from app.utils.telegram_utils import send_message_to_channel
-from app.utils.torrent.qbittorrent_utils import check_torrent_finish_download
+from app.utils.torrent.qbittorrent_utils import check_torrent_finish_download, get_torrent_status, resume_torrent
 
 logger = set_up_logger(__name__)
 
@@ -14,6 +14,9 @@ async def handle_single_download(unfinished_download_hash) :
     """处理单个下载项"""
     result = check_torrent_finish_download(unfinished_download_hash)
     if not result :
+        status = get_torrent_status(unfinished_download_hash)
+        if status == 'resumed' :
+            resume_torrent(unfinished_download_hash)
         return
     item_info_result = RssItemTable.get_item_info_by_hash(unfinished_download_hash)
     if not item_info_result[0] :
