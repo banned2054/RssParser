@@ -6,7 +6,6 @@ import requests
 from app import config
 from app.models.bangumi_subject_info import BangumiSubjectInfo, BangumiType
 from app.utils.log_utils import set_up_logger
-from app.utils.net_utils import fetch
 
 logger = set_up_logger(__name__)
 
@@ -71,8 +70,8 @@ def get_subject_info(subject_id) :
         subject_dict = json.loads(response[1])
         image_url = get_image_url(subject_dict['images'])
         platform = subject_dict['platform']
-        origin_name = subject_dict['name']
-        cn_name = subject_dict['name_cn']
+        origin_name = subject_dict['name'].replace('/', '／')
+        cn_name = subject_dict['name_cn'].replace('/', '／')
         pub_date = datetime.strptime(subject_dict['date'], "%Y-%m-%d").date()
         anime_type = BangumiType(subject_dict['type'])
         subject_info = BangumiSubjectInfo(subject_id, platform, image_url, origin_name, cn_name, anime_type, pub_date)
@@ -80,19 +79,3 @@ def get_subject_info(subject_id) :
         return subject_info
     else :
         return None
-
-
-async def get_subject_name(subject_id) :
-    headers = {
-        'User-Agent'    : config.get_setting('User-Agent'),
-        'Authorization' : config.get_setting('Authorization'),
-        'Cookie'        : config.get_setting('Cookie')
-    }
-    url = f"https://api.bgm.tv/v0/subjects/{subject_id}"
-    response = await fetch(url, headers)
-    if response[0] :
-        subject_dict = json.loads(response[1])
-        cn_name = subject_dict['name_cn']
-        return True, cn_name
-    else :
-        return False, ""
