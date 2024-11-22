@@ -1,4 +1,5 @@
 import datetime
+from contextlib import contextmanager
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, create_engine
@@ -23,18 +24,33 @@ class RssItem(Base) :
     episode = Column(Float)
     pub_date = Column(DateTime)
     download_finish = Column(Boolean, default = False)
-    version = Column(Integer)  # 添加的新列
+    version = Column(Integer)
 
 
-# 设置 MySQL 数据库连接
+# 优化数据库连接配置
 DATABASE_URL = f'mysql+pymysql://{config.mysql_username}:{config.REDACTED_MYSQL_PASSWORD}@{config.mysql_url}/anime'
 engine = create_engine(
         DATABASE_URL,
-        pool_recycle = 1800,  # 30 分钟后重新回收连接
-        pool_pre_ping = True  # 在使用前检查连接是否可用
+        pool_recycle = 1800,
+        pool_pre_ping = True,
+        pool_size = 10,
+        max_overflow = 20
 )
 Session = sessionmaker(bind = engine)
 Base.metadata.create_all(engine)
+
+
+@contextmanager
+def get_session() :
+    session = Session()
+    try :
+        yield session
+        session.commit()
+    except Exception as e :
+        session.rollback()
+        raise e
+    finally :
+        session.close()
 
 
 class RssItemTable :
@@ -82,41 +98,35 @@ class RssItemTable :
 
     @staticmethod
     def get_not_finished_download_item() :
-        session = Session()
-        unfinished_downloads = [item.torrent_hash for item in
-                                session.query(RssItem).filter(RssItem.download_finish == False).all()]
-        session.close()
-        return unfinished_downloads
+        with get_session() as session :
+            return [
+                item.torrent_hash
+                for item in session.query(RssItem).filter(RssItem.download_finish == False).all()
+            ]
 
     @staticmethod
     def finish_item_download(hash_code) :
-        session = Session()
-        item = session.query(RssItem).filter(RssItem.torrent_hash == hash_code).first()
-        if item :
-            item.download_finish = True
-            session.commit()
-        session.close()
+        with get_session() as session :
+            item = session.query(RssItem).filter(RssItem.torrent_hash == hash_code).first()
+            if item :
+                item.download_finish = True
 
     @staticmethod
     def get_item_info_by_hash(hash_code) :
-        session = Session()
-        item = session.query(RssItem).filter(RssItem.torrent_hash == hash_code).first()
-        if item :
-            item_info = RssItemInfo(
-                    item_name = item.item_name,
-                    anime_name = item.anime_name,
-                    origin_name = item.origin_name,
-                    mikan_url = item.mikan_url,
-                    bangumi_id = item.bangumi_id,
-                    episode = item.episode,
-                    pub_date = item.pub_date,
-                    download_finish = item.download_finish,
-                    episode_version = item.version  # 添加的新列
-            )
-            session.close()
-            return True, item_info
-        else :
-            session.close()
+        with get_session() as session :
+            item = session.query(RssItem).filter(RssItem.torrent_hash == hash_code).first()
+            if item :
+                return True, RssItemInfo(
+                        item_name = item.item_name,
+                        anime_name = item.anime_name,
+                        origin_name = item.origin_name,
+                        mikan_url = item.mikan_url,
+                        bangumi_id = item.bangumi_id,
+                        episode = item.episode,
+                        pub_date = item.pub_date,
+                        download_finish = item.download_finish,
+                        episode_version = item.version
+                )
             return False, None
 
     @staticmethod

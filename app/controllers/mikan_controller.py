@@ -26,7 +26,6 @@ async def fresh_rss() :
 
         # 访问rss链接，并解析
         rss_page = await fetch(rss_url)
-        logger.info("fetch rss")
         feed = feedparser.parse(rss_page[1])
 
         # 查询每一个item

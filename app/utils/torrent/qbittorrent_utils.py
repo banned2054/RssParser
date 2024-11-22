@@ -167,7 +167,6 @@ async def after_add_torrent(
         qbt_client.torrents_rename(
                 torrent_hash = torrent_hash, new_torrent_name = new_torrent_name
         )
-        logger.debug(f"Torrent rename: {new_torrent_name}.")
         # 更改文件名
         files = qbt_client.torrents_files(torrent_hash = torrent_hash)
         if dir_name[-1] == "/" :
@@ -176,9 +175,7 @@ async def after_add_torrent(
         qbt_client.torrents_rename_file(
                 torrent_hash = torrent_hash, file_id = 0, new_file_name = new_file_name
         )
-        logger.debug(f"Torrent file rename: {new_file_name}.")
         qbt_client.torrents_add_tags(torrent_hashes = torrent_hash, tags = tag)
-        logger.debug(f"Torrent add tags.")
         # 重新检查文件是否下载完成
         qbt_client.torrents_recheck(torrent_hash)
         logger.debug(f"Torrent rechecked.")
@@ -186,9 +183,14 @@ async def after_add_torrent(
         while status.startswith('checking') :
             await asyncio.sleep(1)
             status = get_torrent_status(torrent_hash)
+        logger.debug(f'Torrent status: {status}')
+        await asyncio.sleep(1)
         # 继续下载
         resume_torrent(torrent_hash)
+        await asyncio.sleep(1)
+        logger.debug(f'Torrent status: {status}')
         logger.debug(f"Torrent resume.")
+
         qbt_client.torrents_reannounce(torrent_hashes = torrent_hash)
         RssItemTable.insert_rss_data(item_info, torrent_hash)
         remove_file(torrent_path)
