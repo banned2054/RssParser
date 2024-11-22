@@ -34,7 +34,7 @@ async def download_file(url, dir_path, retries = 3, timeout = 10) :
                             if not chunk :
                                 break
                             f.write(chunk)
-                    logger.debug(f"Download {url} success, file path: {file_path}.")
+                    # logger.debug(f"Download {url} success, file path: {file_path}.")
                     return True, f"{file_path}"
                 else :
                     raise Exception(f"Cannot download file, status code: {resp.status}")
@@ -77,11 +77,11 @@ async def fetch(url, headers = None, method = "GET", json = None, retries = 3, t
                         if method == "GET" :
                             text = await resp.text()
                             text = html.unescape(text)
-                            logger.debug(f"Fetch {url} success.")
+                            # logger.debug(f"Fetch {url} success.")
                             return True, f"{text}"
                         else :  # POST 请求返回 JSON
                             json_data = await resp.json()
-                            logger.debug(f"POST {url} success.")
+                            # logger.debug(f"POST {url} success.")
                             return True, json_data
                     else :
                         raise Exception(f"Cannot fetch data, status code: {resp.status}")
