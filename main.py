@@ -3,7 +3,7 @@ import multiprocessing
 
 from app import config
 from app.controllers import bangumi_controller, mikan_controller, temp_controller
-from app.controllers.torrent_controller import check_unfinished_downloads_every_minute
+from app.controllers.torrent_controller import process_unfinished_downloads
 from app.utils.file_utils import create_directory_if_not_exists
 
 
@@ -27,7 +27,7 @@ async def async_fresh_rss_every_times() :
 def fresh_torrent_download_finish() :
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(check_unfinished_downloads_every_minute())
+    loop.run_until_complete(process_unfinished_downloads())
 
 
 if __name__ == "__main__" :
