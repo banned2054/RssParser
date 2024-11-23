@@ -18,6 +18,7 @@ async def handle_single_download(unfinished_download_hash) :
         result = check_torrent_finish_download(unfinished_download_hash)
         if not result :
             status = get_torrent_status(unfinished_download_hash)
+            logger.debug(f'{unfinished_download_hash} status is {status}')
             if status == 'resumed' :
                 resume_torrent(unfinished_download_hash)
             return
@@ -54,7 +55,6 @@ async def send_download_complete_message(item) :
 
 async def process_unfinished_downloads() :
     while True :
-        logger.info('刷新未完成种子列表...')
         try :
             unfinished_download_hash_list = RssItemTable.get_not_finished_download_item()
             for unfinished_download_hash in unfinished_download_hash_list :
