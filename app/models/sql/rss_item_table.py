@@ -101,7 +101,7 @@ class RssItemTable :
         with get_session() as session :
             return [
                 item.torrent_hash
-                for item in session.query(RssItem).filter(RssItem.download_finish == False).all()
+                for item in session.query(RssItem).filter(RssItem.download_finish == 0).all()
             ]
 
     @staticmethod
