@@ -188,6 +188,7 @@ async def after_add_torrent(
         # 继续下载
         resume_torrent(torrent_hash)
         await asyncio.sleep(1)
+        status = get_torrent_status(torrent_hash)
         logger.debug(f'Torrent status: {status}')
         logger.debug(f"Torrent resume.")
 
