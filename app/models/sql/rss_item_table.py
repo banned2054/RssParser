@@ -8,8 +8,10 @@ from sqlalchemy.orm import sessionmaker
 
 from app import config
 from app.models.mikan_rss_info import RssItemInfo
+from app.utils.log_utils import set_up_logger
 
 Base = declarative_base()
+logger = set_up_logger(__name__)
 
 
 class RssItem(Base) :
@@ -99,6 +101,9 @@ class RssItemTable :
     @staticmethod
     def get_not_finished_download_item() :
         with get_session() as session :
+            item_list = session.query(RssItem).filter(RssItem.download_finish == 0)
+            for item in item_list :
+                logger.debug(item)
             return [
                 item.torrent_hash
                 for item in session.query(RssItem).filter(RssItem.download_finish == 0).all()
