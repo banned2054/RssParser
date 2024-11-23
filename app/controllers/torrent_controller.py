@@ -19,7 +19,7 @@ async def handle_single_download(unfinished_download_hash) :
         if not result :
             status = get_torrent_status(unfinished_download_hash)
             logger.debug(f'{unfinished_download_hash} status is {status}')
-            if status == 'resumed' :
+            if status.startswith('resumed') :
                 resume_torrent(unfinished_download_hash)
             return
 
