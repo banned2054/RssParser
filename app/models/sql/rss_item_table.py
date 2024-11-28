@@ -102,8 +102,6 @@ class RssItemTable :
     def get_not_finished_download_item() :
         with get_session() as session :
             item_list = session.query(RssItem).filter(RssItem.download_finish == 0)
-            for item in item_list :
-                logger.debug(f'{item.item_name} {item.torrent_hash} not finish')
             return [
                 item.torrent_hash
                 for item in item_list.all()
