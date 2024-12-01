@@ -150,19 +150,19 @@ async def after_add_torrent(
         qbt_client.torrents_add_tags(torrent_hashes = torrent_hash, tags = tag)
         # 重新检查文件是否下载完成
         qbt_client.torrents_recheck(torrent_hash)
-        logger.debug(f"Torrent rechecked.")
+        # logger.debug(f"Torrent rechecked.")
         status = get_torrent_status(torrent_hash)
         while status.startswith('checking') :
             await asyncio.sleep(1)
             status = get_torrent_status(torrent_hash)
-        logger.debug(f'Torrent status: {status}')
+        # logger.debug(f'Torrent status: {status}')
         await asyncio.sleep(1)
         # 继续下载
         resume_torrent(torrent_hash)
         await asyncio.sleep(1)
         status = get_torrent_status(torrent_hash)
-        logger.debug(f'Torrent status: {status}')
-        logger.debug(f"Torrent resume.")
+        # logger.debug(f'Torrent status: {status}')
+        # logger.debug(f"Torrent resume.")
 
         qbt_client.torrents_reannounce(torrent_hashes = torrent_hash)
         RssItemTable.insert_rss_data(item_info, torrent_hash)
