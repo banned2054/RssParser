@@ -3,7 +3,7 @@ import asyncio
 from app import config
 from app.models.sql import BangumiTable, RssItemTable
 from app.utils.log_utils import set_up_logger
-from app.utils.parser.title_parser import clear_title, clear_title_for_tag
+from app.utils.parser.title_parser import clear_title_for_tag
 from app.utils.telegram_utils import send_message_to_channel
 from app.utils.torrent.qbittorrent_utils import check_torrent_finish_download, get_torrent_status, resume_torrent
 
@@ -43,7 +43,6 @@ async def send_download_complete_message(item) :
                 f"下载完成！\n"
                 f"标题: {item.item_name}\n"
                 f"发布时间: {item.pub_date}\n"
-                f"原始标题: {clear_title(item.origin_name)}\n"
                 f"mikan地址: {config.mikan_episode}{item.mikan_url}\n"
                 f"bgm地址: https://bgm.tv/subject/{item.bangumi_id}\n"
                 f"#tv #{name_cn}"
