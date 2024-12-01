@@ -36,28 +36,6 @@ def fetch_bangumi(url) :
     return True, response.text
 
 
-def get_episode_list(subject_id) :
-    """
-    返回对应动画的所有集数
-    :param int subject_id:动画的id
-    :return tuple[bool, str]: 返回string，用','分隔
-    """
-    url = f"https://api.bgm.tv/v0/episodes?subject_id={subject_id}"
-    response = fetch_bangumi(url)
-    if response[0] :
-        subject_dict = json.loads(response[1])
-        data_list = subject_dict['data']
-        episode_list = ''
-        for da in data_list :
-            if episode_list != '' :
-                episode_list = episode_list + ','
-            episode_list += str(da['sort'])
-        logger.info(f'Get anime episodes:[{episode_list}]')
-        return True, f'{episode_list}'
-    else :
-        return response
-
-
 def get_subject_info(subject_id) :
     """
     返回对应的bangumi的信息

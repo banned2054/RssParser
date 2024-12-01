@@ -12,7 +12,7 @@ from app.utils.parser.mikan_parser import get_anime_home_url_from_mikan, get_ban
 from app.utils.parser.title_parser import get_episode, get_subtitle_language, get_title, \
     universal_replace_name
 from app.utils.time_utils import datetime_to_str, struct_time_to_datetime
-from app.utils.torrent.qbittorrent_utils import download_one_file
+from app.utils.torrent.qbittorrent_utils import delete_torrent_by_hash, download_one_file
 
 logger = set_up_logger(__name__)
 
@@ -89,10 +89,12 @@ async def analyze_item(item) :
     latest = RssItemTable.get_latest_episode_torrent(anime_info.id, episode1)
     if now_language == 'baha' and latest is not None :
         return
-
+    hash_list = RssItemTable.get_episode_hashes(anime_info.id, episode1)
     torrent_result = await download_mikan_torrent(item)
     if not torrent_result[0] :
         return
+    for now_hash in hash_list :
+        delete_torrent_by_hash(now_hash)
     await download_and_notify(torrent_result[1], anime_info, item_info, now_language)
 
 

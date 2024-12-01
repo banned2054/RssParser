@@ -32,34 +32,6 @@ async def send_notification(item_info) :
         logger.error(e)
 
 
-def is_torrent_complete_and_matching(torrent_hash, expected_name) :
-    """
-    判断hash值和name是否相匹配，并且该torrent是否下载完成
-
-    :param str torrent_hash: The hash of the torrent to check
-    :param str expected_name: The expected name of the torrent
-    :return tuple[bool, str]: 当hash值和name相匹配，而且该torrent下载完成，返回ture，否则返回false
-    """
-    try :
-        torrent_info = qbt_client.torrents_info(torrent_hashes = torrent_hash)[0]
-        if torrent_info.name != expected_name :
-            logger.error(
-                    f"hash:{torrent_hash}, this torrent's name is not {expected_name}"
-            )
-            return False, "Don't match"
-        if torrent_info.progress < 1 :
-            logger.error(f"hash:{torrent_hash}, this torrent is not download complete")
-            return False, "Download not complete"
-
-        logger.info(
-                f"hash:{torrent_hash}, name: {expected_name}, this torrent download complete"
-        )
-        return True, "Download complete"
-    except IndexError :
-        logger.error(f"hash:{torrent_hash}, this torrent has some error unusual")
-        return False, "Other error"
-
-
 async def download_one_file(
         torrent_path,
         new_torrent_name,
@@ -265,3 +237,16 @@ def check_torrent_exist(torrent_hash) :
             return False
     except Exception as e :
         return False
+
+
+def delete_torrent_by_hash(torrent_hash) :
+    try :
+        # 获取当前存在的种子信息
+        torrents = qbt_client.torrents.info()
+        # 检查是否存在该 hash 的种子
+        if any(torrent.hash.lower() == torrent_hash.lower() for torrent in torrents) :
+            # 删除种子但保留文件
+            qbt_client.torrents_delete(delete_files = False, torrent_hashes = torrent_hash)
+            logger.debug(f"删除旧版本种子，hash:{torrent_hash}")
+    except qbittorrentapi.exceptions.APIError as e :
+        logger.error(f"Failed to delete torrent with hash {torrent_hash}: {e}")

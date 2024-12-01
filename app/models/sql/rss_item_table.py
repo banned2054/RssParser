@@ -134,7 +134,7 @@ class RssItemTable :
 
     @staticmethod
     def get_latest_episode_torrent(bangumi_id: int, episode: float) :
-        session = Session()
+        session = get_session()
         item = session.query(RssItem).filter(RssItem.bangumi_id == bangumi_id, RssItem.episode == episode).order_by(
                 RssItem.pub_date.desc()).first()
         if item :
@@ -154,3 +154,18 @@ class RssItemTable :
         else :
             session.close()
             return None
+
+    @staticmethod
+    def get_episode_hashes(bangumi_id: int, episode: float) :
+        with get_session() as session :
+            items = session.query(RssItem).filter(
+                    RssItem.bangumi_id == bangumi_id,
+                    RssItem.episode == episode
+            ).all()  # 查询所有符合条件的项
+            session.close()
+
+            if items :
+                hashes = [item.torrent_hash for item in items]  # 提取 hash 列表
+                return hashes
+            else :
+                return []

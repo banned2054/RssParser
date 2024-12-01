@@ -9,3 +9,8 @@ SQLAlchemy
 requests
 pymysql
 cryptography
+fastapi
+python-jwt
+geoip2
+uvicorn
+python-jose

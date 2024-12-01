@@ -2,8 +2,7 @@ import feedparser
 
 from app import config
 from app.controllers.mikan_controller import download_and_notify, handle_exception, process_existing_bangumi_item, \
-    process_new_bangumi_item, \
-    should_skip_item
+    process_new_bangumi_item, should_skip_item
 from app.models.sql import BangumiTable, RssItemTable
 from app.utils.log_utils import set_up_logger
 from app.utils.net_utils import download_file, fetch
@@ -34,7 +33,8 @@ async def analyze_item(item, subject_id) :
     if subject_id == -1 :
         return
     item_title = item.title
-    if should_skip_item(item_title) :
+    should_skip, now_language = should_skip_item(item_title)
+    if should_skip :
         return
 
     origin_title = get_title(item_title)
@@ -65,7 +65,7 @@ async def analyze_item(item, subject_id) :
     torrent_result = await download_moe_torrent(item)
     if not torrent_result[0] :
         return
-    await download_and_notify(torrent_result[1], anime_info, item_info)
+    await download_and_notify(torrent_result[1], anime_info, item_info, now_language)
 
 
 async def download_moe_torrent(item) :
