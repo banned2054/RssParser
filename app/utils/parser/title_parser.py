@@ -45,6 +45,13 @@ def clear_title(origin_title) :
     result = pattern.sub("", origin_title).strip()
     result = result.replace('【我推的孩子】 (2024) ', '我推的孩子 第二季')
     result = result.replace('Oshi no Ko (2024) ', 'Oshi no Ko season2')
+    result = result.replace('【喵萌奶茶屋】', '[喵萌奶茶屋]')
+    result = result.replace('  ', ' ')
+    result = result.replace('[WEB-DL]', '')
+    result = result.replace('[AAC AVC]', '')
+    result = result.replace('[WebRip 1080p HEVC-10bit AAC]', '')
+    result = result.replace('[MP4]', '')
+    result = result.replace('[WebRip]', '')
 
     return result.strip()
 

@@ -9,7 +9,7 @@ from app.utils.log_utils import set_up_logger
 from app.utils.net_utils import download_file, fetch
 from app.utils.parser.bangumi_parser import get_subject_info
 from app.utils.parser.mikan_parser import get_anime_home_url_from_mikan, get_bangumi_url_from_mikan
-from app.utils.parser.title_parser import get_episode, get_subtitle_language, get_title, \
+from app.utils.parser.title_parser import clear_title, get_episode, get_subtitle_language, get_title, \
     universal_replace_name
 from app.utils.time_utils import datetime_to_str, struct_time_to_datetime
 from app.utils.torrent.qbittorrent_utils import delete_torrent_by_hash, download_one_file
@@ -69,7 +69,7 @@ async def analyze_item(item) :
         return
 
     bangumi_subject_id = RssItemTable.get_bangumi_id_by_anime_name(origin_title)
-    logger.info(f"add new torrent: {item.title}")
+    logger.info(f"add new torrent: {clear_title(item.title).replace('[1080p]', '').replace('[1080P]', '')}")
     origin_title = get_title(item_title)
     episode1, version1, episode2, version2 = get_episode(item_title)
 
