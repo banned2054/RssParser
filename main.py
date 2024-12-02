@@ -4,6 +4,7 @@ import multiprocessing
 from app import config
 from app.controllers import bangumi_controller, mikan_controller, temp_controller
 from app.controllers.torrent_controller import process_unfinished_downloads
+from app.static_config import start_str
 from app.utils.file_utils import create_directory_if_not_exists
 
 
@@ -32,7 +33,7 @@ def fresh_torrent_download_finish() :
 
 if __name__ == "__main__" :
     create_directory_if_not_exists('download')
-
+    print(start_str)
     multiprocessing.set_start_method("spawn", force = True)
     p1 = multiprocessing.Process(target = fresh_rss_every_times)
     p2 = multiprocessing.Process(target = fresh_torrent_download_finish)
