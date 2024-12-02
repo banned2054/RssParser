@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from sqlalchemy import Column, Date, Integer, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -15,6 +17,19 @@ engine = create_engine(
         pool_pre_ping = True  # 在使用前检查连接是否可用
 )
 Session = sessionmaker(bind = engine)
+
+
+@contextmanager
+def get_session() :
+    session = Session()
+    try :
+        yield session
+        session.commit()
+    except Exception as e :
+        session.rollback()
+        raise e
+    finally :
+        session.close()
 
 
 class BangumiInfo(Base) :
@@ -39,62 +54,56 @@ class BangumiTable :
         Base.metadata.create_all(engine)
 
     @staticmethod
-    def insert_bangumi_data(
-            bangumi_subject_info: BangumiSubjectInfo) :
+    def insert_bangumi_data(bangumi_subject_info: BangumiSubjectInfo) :
         """
         插入一行数据
         """
         BangumiTable.create_bangumi_table_if_not_exists()
-        session = Session()
-        new_bangumi = BangumiInfo(
-                bangumi_id = bangumi_subject_info.id,
-                platform = bangumi_subject_info.platform,
-                image_url = bangumi_subject_info.image_url,
-                origin_name = bangumi_subject_info.origin_name,
-                cn_name = bangumi_subject_info.cn_name,
-                now_type = bangumi_subject_info.now_type.value,
-                pubdate = bangumi_subject_info.pub_date
-        )
-        session.add(new_bangumi)
-        session.commit()
-        session.close()
+        with get_session() as session :
+            new_bangumi = BangumiInfo(
+                    bangumi_id = bangumi_subject_info.id,
+                    platform = bangumi_subject_info.platform,
+                    image_url = bangumi_subject_info.image_url,
+                    origin_name = bangumi_subject_info.origin_name,
+                    cn_name = bangumi_subject_info.cn_name,
+                    now_type = bangumi_subject_info.now_type.value,
+                    pubdate = bangumi_subject_info.pub_date
+            )
+            session.add(new_bangumi)
 
     @staticmethod
     def get_anime_info_by_id(bangumi_id: int) :
         BangumiTable.create_bangumi_table_if_not_exists()
-        session = Session()
-        result = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first()
-        session.close()
-        if result :
-            bangumi_info = BangumiSubjectInfo(
-                    id = result.bangumi_id,
-                    platform = result.platform,
-                    image_url = result.image_url,
-                    origin_name = result.origin_name,
-                    cn_name = result.cn_name,
-                    now_type = BangumiType(result.now_type),
-                    pub_date = result.pubdate
-            )
-            return True, bangumi_info
-        else :
-            return False, None
+        with get_session() as session :
+            result = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first()
+            if result :
+                bangumi_info = BangumiSubjectInfo(
+                        id = result.bangumi_id,
+                        platform = result.platform,
+                        image_url = result.image_url,
+                        origin_name = result.origin_name,
+                        cn_name = result.cn_name,
+                        now_type = BangumiType(result.now_type),
+                        pub_date = result.pubdate
+                )
+                return True, bangumi_info
+            else :
+                return False, None
 
     @staticmethod
     def get_anime_name_by_id(bangumi_id: int) :
         BangumiTable.create_bangumi_table_if_not_exists()
-        session = Session()
-        result = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first()
-        session.close()
-        if result :
-            cn_name = result.cn_name
-            return True, cn_name
-        else :
-            return False, None
+        with get_session() as session :
+            result = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first()
+            if result :
+                cn_name = result.cn_name
+                return True, cn_name
+            else :
+                return False, None
 
     @staticmethod
     def check_anime_exists(bangumi_id: int) :
         BangumiTable.create_bangumi_table_if_not_exists()
-        session = Session()
-        exists = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first() is not None
-        session.close()
-        return exists
+        with get_session() as session :
+            exists = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first() is not None
+            return exists
