@@ -151,10 +151,14 @@ async def after_add_torrent(
         # 重新检查文件是否下载完成
         qbt_client.torrents_recheck(torrent_hash)
         # logger.debug(f"Torrent rechecked.")
-        status = get_torrent_status(torrent_hash)
+        flag, status = get_torrent_status(torrent_hash)
+        if not flag :
+            raise Exception
         while status.startswith('checking') :
             await asyncio.sleep(1)
-            status = get_torrent_status(torrent_hash)
+            flag, status = get_torrent_status(torrent_hash)
+            if not flag :
+                raise Exception
         # logger.debug(f'Torrent status: {status}')
         await asyncio.sleep(1)
         # 继续下载
@@ -167,7 +171,7 @@ async def after_add_torrent(
         qbt_client.torrents_reannounce(torrent_hashes = torrent_hash)
         RssItemTable.insert_rss_data(item_info, torrent_hash)
         remove_file(torrent_path)
-    except :
+    except Exception as e :
         pass
 
 
@@ -177,7 +181,7 @@ def resume_torrent(torrent_hash) :
 
 def check_torrent_finish_download(torrent_hash) :
     try :
-        state = get_torrent_status(torrent_hash)
+        flag, state = get_torrent_status(torrent_hash)
         progress = get_torrent_progress(torrent_hash)
 
         if state == "uploading" or progress == 1 :
@@ -216,13 +220,13 @@ def get_torrent_status(torrent_hash) :
             print(f"No torrent found with hash: {torrent_hash}")
             raise Exception(f'torrent: {torrent_hash} not find')
 
-        return torrent_info[0].state
+        return True, torrent_info[0].state
 
     except qbittorrentapi.exceptions.LoginFailed :
-        print("Login failed! Please check your qBittorrent credentials.")
+        logger.error("Login failed! Please check your qBittorrent credentials.")
         return False
     except Exception as e :
-        print(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return False
 
 
