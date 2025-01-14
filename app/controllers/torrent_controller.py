@@ -2,6 +2,7 @@ import asyncio
 
 from app import config
 from app.models.sql import BangumiTable, RssItemTable
+from app.utils.jellyfin_utils import fresh_anime_library
 from app.utils.log_utils import set_up_logger
 from app.utils.parser.title_parser import clear_title_for_tag
 from app.utils.telegram_utils import send_message_to_channel
@@ -41,6 +42,7 @@ async def send_download_complete_message(item) :
         bangumi_subject_id = item.bangumi_id
         name_cn = BangumiTable.get_anime_name_by_id(bangumi_subject_id)[1]
         name_cn = clear_title_for_tag(name_cn)
+        fresh_anime_library()
         await send_message_to_channel(
                 f"下载完成！\n"
                 f"标题: {item.item_name}\n"
