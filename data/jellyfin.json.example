@@ -1,4 +1,5 @@
 {
-    "jellyfin_url"   : "",
-    "jellyfin_token" : ""
+    "jellyfin_url"     : "",
+    "jellyfin_token"   : "",
+    "anime_library_id" : ""
 }
