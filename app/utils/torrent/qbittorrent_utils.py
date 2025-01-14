@@ -190,7 +190,7 @@ def check_torrent_finish_download(torrent_hash) :
             return False
 
     except Exception as e :
-        print(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e} in check torrent_finish_download()")
         return False
 
 
@@ -208,7 +208,7 @@ def get_torrent_progress(torrent_hash) :
         print("Login failed! Please check your qBittorrent credentials.")
         return False
     except Exception as e :
-        print(f"An error occurred: {e}")
+        print(f"An error occurred: {e} in check get_torrent_progress()")
         return False
 
 
@@ -226,7 +226,7 @@ def get_torrent_status(torrent_hash) :
         logger.error("Login failed! Please check your qBittorrent credentials.")
         return False
     except Exception as e :
-        logger.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e} in check get_torrent_status()")
         return False
 
 
