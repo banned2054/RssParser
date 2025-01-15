@@ -94,6 +94,7 @@ async def analyze_item(item) :
     if not torrent_result[0] :
         return
     for now_hash in hash_list :
+        RssItemTable.finish_item_download(now_hash)
         delete_torrent_by_hash(now_hash)
     await download_and_notify(torrent_result[1], anime_info, item_info, now_language)
 
