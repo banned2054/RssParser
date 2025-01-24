@@ -245,7 +245,7 @@ def delete_torrent_by_hash(torrent_hash) :
         # 检查是否存在该 hash 的种子
         if any(torrent.hash.lower() == torrent_hash.lower() for torrent in torrents) :
             # 删除种子但保留文件
-            qbt_client.torrents_delete(delete_files = False, torrent_hashes = torrent_hash)
+            qbt_client.torrents_delete(delete_files = True, torrent_hashes = torrent_hash)
             logger.debug(f"删除旧版本种子，hash:{torrent_hash}")
     except qbittorrentapi.exceptions.APIError as e :
         logger.error(f"Failed to delete torrent with hash {torrent_hash}: {e}")
