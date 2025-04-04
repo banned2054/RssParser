@@ -25,6 +25,8 @@ def get_subtitle_language(subtitle_name: str) -> str :
         return 'baha'
     if subtitle_name.lower().__contains__('lolihouse') :
         return 'loli'
+    if subtitle_name.__contains__('雪飘工作室') :
+        return 'snow'
     for key, value in SUBTITLE_LANG.items() :
         for v in value :
             if v in subtitle_name.lower() :

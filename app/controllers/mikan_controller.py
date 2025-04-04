@@ -113,6 +113,8 @@ def should_skip_item(item_title) :
         return False, 'baha'
     if now_language == 'loli' :
         return False, 'LoliHouse'
+    if now_language == 'snow' :
+        return False, 'snow'
 
     if now_language != target_language :
         return True, None
