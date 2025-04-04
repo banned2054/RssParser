@@ -39,22 +39,51 @@ class NekoMoeParser(IMatchingStrategy) :
         # 以下仅作示例：分成单集、多集两部分
         self.single_episode_patterns = [
             re.compile(
-                    r"^【喵萌奶茶屋】(?:★\d+月新番★)?\[(?P<title>.+?)\s*/\s*(?P<title_jp>.+?)]\[(?P<episode>\d+)"
-                    r"(?:v(?P<version>\d+))?]\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]", re.IGNORECASE),
+                    r"^【喵萌奶茶屋】"
+                    r"(?:★\d+月新番★)?"
+                    r"\[(?P<title>.+?)]"
+                    r"\[(?P<episode>\d+)"
+                    r"(?:v(?P<version>\d+))?]"
+                    r"(?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<lang>.+?)]", re.IGNORECASE),
             re.compile(
-                    r"^【喵萌奶茶屋】(?:★\d+月新番★)?\[(?P<title>.+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?]"
-                    r"\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]", re.IGNORECASE),
-            re.compile(
-                    r"^【喵萌Production】(?:★\d+月新番★)?\[(?P<title>.+?)\s*/\s*(?P<title_jp>.+?)]"
-                    r"\[(?P<episode>\d+)(?:v(?P<version>\d+))?]\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]", re.IGNORECASE),
-            re.compile(
-                    r"^【喵萌Production】(?:★\d+月新番★)?\[(?P<title>.+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?]"
-                    r"\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]", re.IGNORECASE),
+                    r"^【喵萌Production】"
+                    r"(?:★\d+月新番★)?"
+                    r"\[(?P<title>.+?)]"
+                    r"\[(?P<episode>\d+)"
+                    r"(?:v(?P<version>\d+))?]"
+                    r"(?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<lang>.+?)]", re.IGNORECASE),
         ]
         self.multiple_episode_patterns = [
             re.compile(
-                    r"^【喵萌Production】(?:★\d+月新番★)?\[(?P<title>.+?)\s*/\s*(?P<title_jp>.+?)]\[(?P<start>\d+)(?:v\d+)?-(?P<end>\d+)(?:v\d+)?(?:END)?]"
-                    r"\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]", re.IGNORECASE),
+                    r"^【喵萌奶茶屋】"
+                    r"(?:★\d+月新番★)?"
+                    r"\[(?P<title>.+?)]"
+                    r"\[(?P<start>\d+)"
+                    r"(?:v(?P<version1>\d+))?"
+                    r"-(?P<end>\d+)"
+                    r"(?:v(?P<version2>\d+))?"
+                    r"(?:END)?"
+                    r"(?:\+(?P<OAD>[a-zA-Z\u4e00-\u9fff]+]))?]"
+                    r"(?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<lang>.+?)]", re.IGNORECASE),
+            re.compile(
+                    r"^【喵萌Production】"
+                    r"(?:★\d+月新番★)?"
+                    r"\[(?P<title>.+?)]"
+                    r"\[(?P<start>\d+)"
+                    r"(?:v(?P<version1>\d+))?"
+                    r"-(?P<end>\d+)"
+                    r"(?:v(?P<version2>\d+))?"
+                    r"(?:END)?"
+                    r"(?:\+(?P<OAD>[a-zA-Z\u4e00-\u9fff]+))?]"
+                    r"(?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<lang>.+?)]", re.IGNORECASE),
         ]
 
     def try_match(self, filename: str) -> tuple[bool, ParsedInfo | None] :

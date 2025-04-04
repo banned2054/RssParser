@@ -59,29 +59,70 @@ class SakuratoParser(IMatchingStrategy) :
         # 以下仅作示例：分成单集、多集两部分
         self.single_episode_patterns = [
             re.compile(
-                    r"^\[桜都字幕组]\s(?P<title>.+?)\s\[(?P<episode>\d+(?:v\d+)?)]\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]",
+                    r"^\[桜都字幕组]"
+                    r"\s(?P<title>.+?)\s"
+                    r"\[(?P<episode>\d+)(?:v(?P<version>\d+))?]"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<lang>.+?)]",
                     re.IGNORECASE),
             re.compile(
-                    r"^\[桜都字幕組]\s(?P<title>.+?)\s\[(?P<episode>\d+(?:v\d+)?)]\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]("
-                    r"?:\s\[(?P<extra>.+?)])?", re.IGNORECASE),
+                    r"^\[桜都字幕組]"
+                    r"\s(?P<title>.+?)\s"
+                    r"\[(?P<episode>\d+)(?:v(?P<version>\d+))?]"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<lang>.+?)]"
+                    r"(?:\s\[(?P<extra>.+?)])?", re.IGNORECASE),
             re.compile(
-                    r"^\[Sakurato]\s(?P<title>.+?)\s\[(?P<episode>\d+(?:v\d+)?)]\[(?P<codec>.+?)\s(?P<resolution>\d+p)"
-                    r"\s(?P<audio>.+?)]\[(?P<lang>.+?)]", re.IGNORECASE),
+                    r"^\[Sakurato]"
+                    r"\s(?P<title>.+?)\s"
+                    r"\[(?P<episode>\d+)(?:v(?P<version>\d+))?]"
+                    r"\[(?P<codec>.+?)"
+                    r"\s(?P<resolution>\d+[pP])"
+                    r"\s(?P<audio>.+?)]"
+                    r"\[(?P<lang>.+?)]", re.IGNORECASE),
             re.compile(
-                    r"^\[Sakurato]\[(?P<title>.+?)]\[(?P<title_jp>.+?)]\[(?P<episode>\d+(?:v\d+)?)]"
-                    r"\[(?P<resolution>\d+p)]\[(?P<source>.+?)]\[(?P<format>.+?)]", re.IGNORECASE),
+                    r"^\[Sakurato]"
+                    r"\[(?P<title>.+?)]"
+                    r"\[(?P<title_jp>.+?)]"
+                    r"\[(?P<episode>\d+)(?:v(?P<version>\d+))?]"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<source>.+?)]"
+                    r"\[(?P<format>.+?)]", re.IGNORECASE),
         ]
         self.multiple_episode_patterns = [
             re.compile(
-                    r"^\[桜都字幕组]\s(?P<title>.+?)\s\[(?P<start>\d+)(?:v\d+)?-(?P<end>\d+)(?:v\d+)?]\[("
-                    r"?P<resolution>\d+p)]\[(?P<lang>.+?)]", re.IGNORECASE),
+                    r"^\[桜都字幕组]"
+                    r"\s(?P<title>.+?)\s"
+                    r"\[(?P<start>\d+)"
+                    r"(?:v(?P<version1>\d+))?"
+                    r"-(?P<end>\d+)"
+                    r"(?:v(?P<version2>\d+))?"
+                    r"\s*(fin)?(Fin)?]"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<lang>.+?)]", re.IGNORECASE),
 
             re.compile(
-                    r"^\[桜都字幕組]\s(?P<title>.+?)\s\[(?P<start>\d+)(?:v\d+)?-(?P<end>\d+)(?:v\d+)?]\[("
-                    r"?P<resolution>\d+p)]\[(?P<lang>.+?)]", re.IGNORECASE),
+                    r"^\[桜都字幕組]"
+                    r"\s(?P<title>.+?)\s"
+                    r"\[(?P<start>\d+)"
+                    r"(?:v(?P<version1>\d+))?"
+                    r"-(?P<end>\d+)"
+                    r"(?:v(?P<version2>\d+))?"
+                    r"\s*(fin)?(Fin)?]"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<lang>.+?)]", re.IGNORECASE),
             re.compile(
-                    r"^\[Sakurato]\[(?P<title>.+?)]\[(?P<title_jp>.+?)]\[(?P<start>\d+)(?:v\d+)?-(?P<end>\d+)(?:v\d+)?"
-                    r"(fin)?(Fin)?]\[(?P<resolution>\d+p)]\[(?P<source>.+?)]\[(?P<format>.+?)]", re.IGNORECASE),
+                    r"^\[Sakurato]"
+                    r"\[(?P<title>.+?)]"
+                    r"\[(?P<title_jp>.+?)]"
+                    r"\[(?P<start>\d+)"
+                    r"(?:v(?P<version1>\d+))?"
+                    r"-(?P<end>\d+)"
+                    r"(?:v(?P<version2>\d+))?"
+                    r"\s*(fin)?(Fin)?]"
+                    r"\[(?P<resolution>\d+[pP])]"
+                    r"\[(?P<source>.+?)]"
+                    r"\[(?P<format>.+?)]", re.IGNORECASE),
         ]
 
     def try_match(self, filename: str) -> tuple[bool, ParsedInfo | None] :
