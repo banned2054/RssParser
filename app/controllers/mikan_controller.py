@@ -72,7 +72,8 @@ async def analyze_item(item) :
     logger.info(f"add new torrent: {clear_title(item.title).replace('[1080p]', '').replace('[1080P]', '')}")
     origin_title = get_title(item_title)
     episode1, version1, episode2, version2 = get_episode(item_title)
-
+    if episode1 > 24 and bangumi_subject_id == 420628 :
+        bangumi_subject_id = 486347
     if bangumi_subject_id == -1 :
         bangumi_subject_id = await get_bangumi_url(item)
         if bangumi_subject_id == -1 :
