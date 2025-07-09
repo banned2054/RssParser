@@ -74,6 +74,10 @@ async def analyze_item(item) :
     episode1, version1, episode2, version2 = get_episode(item_title)
     if episode1 > 24 and bangumi_subject_id == 420628 :
         bangumi_subject_id = 486347
+    if episode1 > 12 and bangumi_subject_id == 467461 :
+        bangumi_subject_id = 529431
+    if episode1 > 13 and bangumi_subject_id == 484623 :
+        episode1 -= 13
     if bangumi_subject_id == -1 :
         bangumi_subject_id = await get_bangumi_url(item)
         if bangumi_subject_id == -1 :
