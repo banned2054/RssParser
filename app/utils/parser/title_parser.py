@@ -21,7 +21,7 @@ SUBTITLE_LANG = {
 }
 
 
-def get_subtitle_language(subtitle_name: str) -> str :
+def get_subtitle_language(subtitle_name: str) -> str | None :
     subtitle_name_lower = subtitle_name.lower()
     if 'baha' in subtitle_name_lower :
         return 'baha'
@@ -33,6 +33,7 @@ def get_subtitle_language(subtitle_name: str) -> str :
         for v in values :
             if v in subtitle_name_lower :
                 return key
+    return None
 
 
 def clear_title(origin_title: str) -> str :
@@ -130,7 +131,7 @@ def universal_replace_name(target, anime_info, episode = None) :
 
 
 def clear_title_for_tag(origin_title: str) -> str :
-    result = re.sub(r"[：:，,。\-~“”‘’\"\'!！?？/\\]", "_", origin_title)
+    result = re.sub(r"[：:，,。\-~“”‘’\"\'!！?？/\\\s]", "_", origin_title)
     result = re.sub(r'[\[(【)\]】）]', "", result)
     result = re.sub(r"_+", "_", result)
     return result.strip("_")
