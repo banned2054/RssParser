@@ -27,7 +27,7 @@ class AniParser(BaseParser) :
 
         self.single_episode_patterns = [
             re.compile(
-                    r"\[ANi](?P<title>[^\[\]]+?)-\s?(?P<episode>\d+)(?:v(?P<version>\d+))?\s?\[(?P<resolution>\d+[pP])]\[(?P<websource>Baha)]\[(?P<source>WEB-DL)]\[(?P<codeA>AAC)\s(?P<codeV>AVC)]\[(?P<lang>.+?)]",
+                    r"\[ANi](?P<title>[^\[\]]+?)-\s?(?P<episode>\d+)(?:v(?P<version>\d+))?\s?\[(?P<resolution>\d+p)]\[(?P<websource>Baha)]\[(?P<source>WEB-DL)]\[(?P<codeA>AAC)\s(?P<codeV>AVC)]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
         ]
@@ -61,10 +61,12 @@ class AniParser(BaseParser) :
 
         lang, sub_type = self.detect_language_subtitle(lang_str)
 
+        version = int(match.groupdict().get("version", '1'))
         return ParseResult(
                 is_multiple = False,
                 title = title,
                 episode = episode,
+                version = version,
                 group = self.group_name,
                 group_type = self.group_type,
                 resolution = EnumResolution.from_string(resolution_str),

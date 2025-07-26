@@ -20,27 +20,25 @@ class NekoMoeParser(BaseParser) :
         super().__init__()
         self.single_episode_patterns = [
             re.compile(
-                    r"【(?:喵萌奶茶屋|喵萌Production)】(?:★\d+月新番★)?\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v("
-                    r"?P<version>\d+))?](?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?\[(?P<resolution>\d+[pP])]\[(?P<lang>.+?)]",
+                    r"【(?:喵萌奶茶屋|喵萌Production)】(?:★\d+月新番★)?\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
             re.compile(
-                    r"【(?P<group>喵萌奶茶屋&[^\[\]]+)】(?:★\d+月新番★)?\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v("
-                    r"?P<version>\d+))?](?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?\[(?P<resolution>\d+[pP])]\[(?P<lang>.+?)]",
+                    r"【(?P<group>喵萌奶茶屋&[^\[\]]+)】(?:★\d+月新番★)?\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
             re.compile(
-                    r"\[Nekomoe kissaten]\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?](?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?\[(?P<resolution>\d+[pP])]\[(?P<lang>.+?)]",
+                    r"\[(?P<group>[^\[\]]+&Nekomoe kissaten)]\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)](?:\[(?:v(?P<version>\d+))?])?",
                     re.IGNORECASE
             ),
             re.compile(
-                    r"\[(?P<group>[^\[\]]+&Nekomoe kissaten)]\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?](?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?\[(?P<resolution>\d+[pP])]\[(?P<lang>.+?)]",
+                    r"\[Nekomoe kissaten]\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
         ]
         self.multiple_episode_patterns = [
             re.compile(
-                    r"【(?:喵萌奶茶屋|喵萌Production)】(?:★\d+月新番★)?\[(?P<title>[^\[\]]+?)]\[(?P<start>\d+)(?:v(?P<version1>\d+))?-(?P<end>\d+)(?:v(?P<version2>\d+))?(?:END)?(?:\+(?P<OAD>[a-zA-Z\u4e00-\u9fff]+))?](?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?\[(?P<resolution>\d+[pP])]\[(?P<lang>.+?)]",
+                    r"【(?:喵萌奶茶屋|喵萌Production)】(?:★\d+月新番★)?\[(?P<title>[^\[\]]+?)]\[(?P<start>\d+)-(?P<end>\d+)(?:END)?(?:\+(?P<OAD>[a-zA-Z\u4e00-\u9fff]+))?](?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?\[(?P<resolution>\d+[pP])]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
         ]
@@ -57,10 +55,14 @@ class NekoMoeParser(BaseParser) :
 
         group = match.groupdict().get("lang", self.group_name)
 
+        version_str = match.groupdict().get("version", '1')
+        version = int(version_str) if version_str else 1
+
         return ParseResult(
                 is_multiple = False,
                 title = title,
                 episode = episode,
+                version = version,
                 group = group,
                 resolution = EnumResolution.from_string(resolution_str),
                 language = lang,

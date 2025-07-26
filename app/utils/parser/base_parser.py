@@ -106,11 +106,13 @@ class BaseParser(ABC) :
         title = str(match.groupdict().get("title", "")).strip()
 
         lang, sub_type = self.detect_language_subtitle(lang_str)
+        version = int(match.groupdict().get("version", '1'))
 
         return ParseResult(
                 is_multiple = False,
                 title = title,
                 episode = episode,
+                version = version,
                 group = self.group_name,
                 resolution = EnumResolution.from_string(resolution_str),
                 language = lang,
