@@ -17,6 +17,8 @@ class ParseResult :
 
     # 单集集数
     episode: Optional[float] = None
+    # 单集版本
+    version: Optional[int] = None
 
     # 多集的第一集
     start_episode: Optional[int] = None
