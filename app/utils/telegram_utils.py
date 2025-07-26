@@ -10,7 +10,7 @@ logger = set_up_logger(__name__)
 
 
 async def send_message(message) :
-    await send_gotify(message)
+    await send_download_gotify(message)
     proxy = config.get_config("proxy_url")
     request = HTTPXRequest(proxy = proxy)
     bot = Bot(token = config.get_config('telegram_token'), request = request)
@@ -22,7 +22,7 @@ async def send_message(message) :
 
 
 async def send_message_to_channel(message) :
-    await send_download_gotify(message)
+    await send_gotify(message)
     proxy = config.get_config("proxy_url")
     request = HTTPXRequest(proxy = proxy)
     bot = Bot(token = config.get_config('telegram_token'), request = request)
