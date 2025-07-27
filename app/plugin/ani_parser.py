@@ -61,7 +61,7 @@ class AniParser(BaseParser) :
 
         lang, sub_type = self.detect_language_subtitle(lang_str)
 
-        version = int(match.groupdict().get("version", '1'))
+        version = int(match.groupdict().get("version", '1') or '1')
         return ParseResult(
                 is_multiple = False,
                 title = title,

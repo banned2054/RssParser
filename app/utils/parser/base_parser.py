@@ -106,7 +106,7 @@ class BaseParser(ABC) :
         title = str(match.groupdict().get("title", "")).strip()
 
         lang, sub_type = self.detect_language_subtitle(lang_str)
-        version = int(match.groupdict().get("version", '1'))
+        version = int(match.groupdict().get("version", '1') or '1')
 
         return ParseResult(
                 is_multiple = False,
