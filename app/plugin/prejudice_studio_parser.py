@@ -4,15 +4,14 @@ import re
 from app.models.enum.enum_group_type import EnumGroupType
 from app.models.enum.enum_language import EnumLanguage
 from app.models.enum.enum_resolution import EnumResolution
-from app.models.enum.enum_subtitle_type import EnumSubtitleType
 from app.models.parser_result import ParseResult
 from app.utils.parser.base_parser import BaseParser
 
 
-class AniParser(BaseParser) :
+class PrejudiceStudioParser(BaseParser) :
     @property
     def group_name(self) -> str :
-        return "ANi"
+        return "Prejudice-Studio"
 
     @property
     def group_type(self) -> EnumGroupType :
@@ -20,29 +19,20 @@ class AniParser(BaseParser) :
 
     def __init__(self) :
         super().__init__()
-        self.language_map["CHT CHS"] = EnumLanguage.ScTc
-        self.subtitle_type_map["CHT CHS"] = EnumSubtitleType.Muxed
-        self.subtitle_type_map["CHT"] = EnumSubtitleType.Embedded
-        self.subtitle_type_map["CHS"] = EnumSubtitleType.Embedded
+        self.language_map["简繁英"] = EnumLanguage.EngScTc
 
         self.single_episode_patterns = [
             re.compile(
-                    r"\[ANi](?P<title>[^\[\]]+?)-\s?(?P<episode>\d+)(?:v(?P<version>\d+))?\s?\[(?P<resolution>\d+p)]\[(?P<websource>Baha)]\[(?P<source>WEB-DL)]\[(?P<codeA>AAC)\s(?P<codeV>AVC)]\[(?P<lang>.+?)]",
+                    r"\[Prejudice-Studio](?P<title>[^\[\]]+?)-\s?(?P<episode>\d+)(?:v(?P<version>\d+))?\s?\[(?P<websource>Bilibili)?\s?(?P<source>WEB-DL|WebRip)\s(?P<resolution>\d+p)\s(?P<codeV>AVC)\s(?P<videoRate>\d+bit)\s(?P<codeA>AAC)\s?(?P<extension>MP4|MKV)?]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
         ]
-
-    def detect_language_subtitle(self, lang: str) -> tuple[EnumLanguage, EnumSubtitleType] :
-        lower_lang = lang.lower().strip()
-        language = EnumLanguage.Unknown
-        subtitle_type = EnumSubtitleType.Embedded  # 默认值
-
-        for k, v in sorted(self.language_map.items(), key = lambda kv : len(kv[0]), reverse = True) :
-            if k.lower() in lower_lang :
-                language = v
-                break
-
-        return language, subtitle_type
+        self.multiple_episode_patterns = [
+            re.compile(
+                    r"\[Prejudice-Studio](?P<title>[^\[\]]+?)\s?\[(?P<start>\d+)-(?P<end>\d+)]\[(?P<websource>Bilibili)\s(?P<source>WEB-DL|WebRip)\s(?P<resolution>\d+p)\s(?P<codeV>AVC)\s(?P<videoRate>\d+bit)\s(?P<codeA>AAC)\s?(?P<extension>MP4|MKV)?]\[(?P<lang>.+?)]",
+                    re.IGNORECASE
+            ),
+        ]
 
     def create_parsed_result_single(self, match: re.Match) -> ParseResult :
         episode_str = match.groupdict().get("episode", "0")

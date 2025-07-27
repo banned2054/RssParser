@@ -4,18 +4,27 @@ from app import config
 from app.models.enum.enum_language import EnumLanguage
 from app.plugin.ani_parser import AniParser
 from app.plugin.nekomoe_parser import NekoMoeParser
+from app.plugin.prejudice_studio_parser import PrejudiceStudioParser
+from app.plugin.sakura_hana_parser import SakuraHanaParser
 from app.plugin.sakurato_parser import SakuratoParser
+from app.plugin.sweet_sub_parser import SweetSubParser
 from app.utils.log_utils import set_up_logger
 
 logger = set_up_logger(__name__)
 
 ani = AniParser()
-sakurato = SakuratoParser()
 neko_moe = NekoMoeParser()
+prejudice_studio = PrejudiceStudioParser()
+sakura_hana = SakuraHanaParser()
+sakurato = SakuratoParser()
+sweet_sub = SweetSubParser()
 parser_list = [
     ani,
-    sakurato,
     neko_moe,
+    prejudice_studio,
+    sakura_hana,
+    sakurato,
+    sweet_sub,
 ]
 RULES = [
     r"(.*) - (\d{1,4}(?!\d|p)|\d{1,4}\.\d{1,2})(?:v(\d{1,2}))?(?:-\d{1,4}(?:v\d{1,2})?)?(?: )?(?:END)?(.*)",
@@ -110,7 +119,7 @@ def get_episode(origin_title: str) :
     result = parser_with_ani_parser(origin_title)
     if result is not None :
         if result.is_multiple :
-            return result.start_episode, 1, result.episode_number, 1
+            return result.start_episode, 1, result.end_episode, 1
         return result.episode, result.version, -1, -1
     cleared_title = clear_title(origin_title)
     for rule in RULES :
