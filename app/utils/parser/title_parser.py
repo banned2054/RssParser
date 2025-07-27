@@ -36,6 +36,8 @@ SUBTITLE_LANG = {
 def get_subtitle_language(subtitle_name: str) -> str | None :
     result = parser_with_ani_parser(subtitle_name)
     if result is not None :
+        if result.group is 'ANi' :
+            return 'baha'
         if result.language is EnumLanguage.JpScTc :
             return "zh-sc-and-tc"
         if result.language is EnumLanguage.JpSc :
@@ -47,8 +49,6 @@ def get_subtitle_language(subtitle_name: str) -> str | None :
         if result.language is EnumLanguage.Tc :
             return "zh-tc"
     subtitle_name_lower = subtitle_name.lower()
-    if 'baha' in subtitle_name_lower :
-        return 'baha'
     if 'lolihouse' in subtitle_name_lower :
         return 'loli'
     if '雪飘工作室' in subtitle_name :
