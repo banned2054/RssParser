@@ -22,8 +22,7 @@ class SakuratoParser(BaseParser) :
                     re.IGNORECASE
             ),
             re.compile(
-                    r"\[Sakurato](?P<title>[^\[\]]+?)\[(?P<episode>\d+)(?:v(?P<version>\d+))?]\[(?P<vcodec>(HEVC|AVC|AVC-8bit|HEVC-10bit))?\s?(?P<resolution>\d+p)\s?(?P<acodec>(AAC))?]\[("
-                    r"?P<lang>.+?)\]",
+                    r"\[Sakurato](?P<title>[^\[\]]+?)\[(?P<episode>\d+)(?:v(?P<version>\d+))?]\[(?P<vcodec>(HEVC|AVC|AVC-8bit|HEVC-10bit))?\s?(?P<resolution>\d+p)\s?(?P<acodec>(AAC))?]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
             re.compile(

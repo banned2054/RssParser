@@ -28,17 +28,17 @@ class NekoMoeParser(BaseParser) :
                     re.IGNORECASE
             ),
             re.compile(
-                    r"\[(?P<group>[^\[\]]+&Nekomoe kissaten)]\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)](?:\[(?:v(?P<version>\d+))?])?",
+                    r"\[Nekomoe kissaten]\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
             re.compile(
-                    r"\[Nekomoe kissaten]\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]",
+                    r"\[(?P<group>[^\[\]]+&Nekomoe kissaten)]\[(?P<title>[^\[\]]+?)]\[(?P<episode>\d+)(?:v(?P<version>\d+))?](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
         ]
         self.multiple_episode_patterns = [
             re.compile(
-                    r"【(?:喵萌奶茶屋|喵萌Production)】(?:★\d+月新番★)?\[(?P<title>[^\[\]]+?)]\[(?P<start>\d+)-(?P<end>\d+)(?:END)?(?:\+(?P<OAD>[a-zA-Z\u4e00-\u9fff]+))?](?:\[(?P<source>[a-zA-Z]+[Rr]ip)])?\[(?P<resolution>\d+[pP])]\[(?P<lang>.+?)]",
+                    r"【(?:喵萌奶茶屋|喵萌Production)】(?:★\d+月新番★)?\[(?P<title>[^\[\]]+?)]\[(?P<start>\d+)-(?P<end>\d+)(?:END)?(?:\+(?P<OAD>[a-z\u4e00-\u9fff]+))?](?:\[(?P<source>[a-z]+Rip)])?\[(?P<resolution>\d+p)]\[(?P<lang>.+?)]",
                     re.IGNORECASE
             ),
         ]
