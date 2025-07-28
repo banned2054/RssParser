@@ -2,6 +2,7 @@ import asyncio
 
 from app import config
 from app.models.sql import BangumiTable, RssItemTable
+from app.utils.gotify_utils import send_gotify
 from app.utils.jellyfin_utils import fresh_anime_library
 from app.utils.log_utils import set_up_logger
 from app.utils.parser.title_parser import clear_title_for_tag
@@ -43,14 +44,14 @@ async def send_download_complete_message(item) :
         name_cn = BangumiTable.get_anime_name_by_id(bangumi_subject_id)[1]
         name_cn = clear_title_for_tag(name_cn)
         fresh_anime_library()
-        await send_message_to_channel(
-                f"下载完成！\n"
-                f"标题: {item.item_name}\n"
-                f"发布时间: {item.pub_date}\n"
-                f"mikan地址: {config.mikan_episode}{item.mikan_url}\n"
-                f"bgm地址: https://bgm.tv/subject/{item.bangumi_id}\n"
-                f"#tv #{name_cn}"
-        )
+        message = f"下载完成！\n"
+        f"标题: {item.item_name}\n"
+        f"发布时间: {item.pub_date}\n"
+        f"mikan地址: {config.mikan_episode}{item.mikan_url}\n"
+        f"bgm地址: https://bgm.tv/subject/{item.bangumi_id}\n"
+        f"#tv #{name_cn}"
+        await send_gotify(message)
+        await send_message_to_channel(message)
     except Exception as e :
         logger.error(f"发送下载完成消息失败: {e}")
 

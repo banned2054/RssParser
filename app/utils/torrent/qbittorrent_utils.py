@@ -6,6 +6,7 @@ import qbittorrentapi
 from app import config
 from app.models.sql import RssItemTable
 from app.utils.file_utils import remove_file
+from app.utils.gotify_utils import send_download_gotify
 from app.utils.log_utils import set_up_logger
 from app.utils.parser.title_parser import clear_title
 from app.utils.telegram_utils import send_message
@@ -21,13 +22,13 @@ logger = set_up_logger(__name__)
 
 async def send_notification(item_info) :
     try :
-        await send_message(
-                f"标题:{item_info.item_name}\n"
-                f"发布时间:{item_info.pub_date}\n"
-                f"原始标题{clear_title(item_info.origin_name)}\n"
-                f"mikan地址:{config.mikan_episode}{item_info.mikan_url}\n"
-                f"bgm地址:https://bgm.tv/subject/{item_info.bangumi_id}"
-        )
+        message = f"标题:{item_info.item_name}\n"
+        f"发布时间:{item_info.pub_date}\n"
+        f"原始标题{clear_title(item_info.origin_name)}\n"
+        f"mikan地址:{config.mikan_episode}{item_info.mikan_url}\n"
+        f"bgm地址:https://bgm.tv/subject/{item_info.bangumi_id}"
+        await send_download_gotify(message)
+        await send_message(message)
     except Exception as e :
         logger.error(e)
 
@@ -69,9 +70,11 @@ async def download_one_file(
             return
         now_len = get_torrent_file_len(torrent_path)
         if now_len > 1 :
-            await send_message('出现多文件:\n'
-                               f'标题：{clear_title(item_info.origin_name)}\n'
-                               f'链接:https://mikanani.me/Home/Episode/{item_info.mikan_url}')
+            message = '出现多文件:\n'
+            f'标题：{clear_title(item_info.origin_name)}\n'
+            f'链接:https://mikanani.me/Home/Episode/{item_info.mikan_url}'
+            await send_download_gotify(message)
+            await send_message(message)
 
             RssItemTable.insert_rss_data(item_info, "error", True)
             raise Exception(
