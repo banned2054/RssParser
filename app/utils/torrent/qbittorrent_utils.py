@@ -22,11 +22,7 @@ logger = set_up_logger(__name__)
 
 async def send_notification(item_info) :
     try :
-        message = f"标题:{item_info.item_name}\n"
-        f"发布时间:{item_info.pub_date}\n"
-        f"原始标题{clear_title(item_info.origin_name)}\n"
-        f"mikan地址:{config.mikan_episode}{item_info.mikan_url}\n"
-        f"bgm地址:https://bgm.tv/subject/{item_info.bangumi_id}"
+        message = f"标题:{item_info.item_name}\n发布时间:{item_info.pub_date}\n原始标题{clear_title(item_info.origin_name)}\nmikan地址:{config.mikan_episode}{item_info.mikan_url}\nbgm地址:https://bgm.tv/subject/{item_info.bangumi_id}"
         await send_download_gotify(message)
         await send_message(message)
     except Exception as e :
@@ -70,9 +66,7 @@ async def download_one_file(
             return
         now_len = get_torrent_file_len(torrent_path)
         if now_len > 1 :
-            message = '出现多文件:\n'
-            f'标题：{clear_title(item_info.origin_name)}\n'
-            f'链接:https://mikanani.me/Home/Episode/{item_info.mikan_url}'
+            message = f'出现多文件:标题：{clear_title(item_info.origin_name)}链接:https://mikanani.me/Home/Episode/{item_info.mikan_url}'
             await send_download_gotify(message)
             await send_message(message)
 

@@ -44,12 +44,7 @@ async def send_download_complete_message(item) :
         name_cn = BangumiTable.get_anime_name_by_id(bangumi_subject_id)[1]
         name_cn = clear_title_for_tag(name_cn)
         fresh_anime_library()
-        message = f"下载完成！\n"
-        f"标题: {item.item_name}\n"
-        f"发布时间: {item.pub_date}\n"
-        f"mikan地址: {config.mikan_episode}{item.mikan_url}\n"
-        f"bgm地址: https://bgm.tv/subject/{item.bangumi_id}\n"
-        f"#tv #{name_cn}"
+        message = f"下载完成！\n标题: {item.item_name}\n发布时间: {item.pub_date}\nmikan地址: {config.mikan_episode}{item.mikan_url}\nbgm地址: https://bgm.tv/subject/{item.bangumi_id}\n#tv #{name_cn}"
         await send_gotify(message)
         await send_message_to_channel(message)
     except Exception as e :
