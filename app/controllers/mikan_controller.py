@@ -1,6 +1,9 @@
 import traceback
+from typing import Tuple
 
 import feedparser
+from pyaniparser import AniParser
+from pyaniparser.types import EnumLanguage, EnumMediaType, EnumResolution, ParseResult
 
 from app import config
 from app.models.mikan_rss_info import RssItemInfo
@@ -9,122 +12,113 @@ from app.utils.log_utils import set_up_logger
 from app.utils.net_utils import download_file, fetch
 from app.utils.parser.bangumi_parser import get_subject_info
 from app.utils.parser.mikan_parser import get_anime_home_url_from_mikan, get_bangumi_url_from_mikan
-from app.utils.parser.title_parser import clear_title, get_episode, get_subtitle_language, get_title, \
-    universal_replace_name
+from app.utils.parser.title_parser import clear_title, universal_replace_name
 from app.utils.time_utils import datetime_to_str, struct_time_to_datetime
 from app.utils.torrent.qbittorrent_utils import delete_torrent_by_hash, download_one_file
 
 logger = set_up_logger(__name__)
+
+ani = AniParser()
 
 
 async def fresh_rss() :
     try :
         config.fresh_config()
         rss_url = config.rss_url
-        if rss_url == "" :
+        if not rss_url :
             raise Exception("rss link is empty")
 
-        # 访问rss链接，并解析
-        rss_page = await fetch(rss_url)
-        feed = feedparser.parse(rss_page[1])
+        ok, data = await fetch(rss_url)
+        if not ok :
+            raise Exception(f"fetch rss failed: {data}")
 
-        # 查询每一个item
-        for item in reversed(feed.entries) :
+        feed = feedparser.parse(data)
+        if getattr(feed, "bozo", 0) :
+            err = getattr(feed, "bozo_exception", None)
+            raise Exception(f"parse rss failed: {err!r}")
+
+        for item in reversed(getattr(feed, "entries", [])) :
             await analyze_item(item)
+        return True, "ok"
     except Exception as e :
         handle_exception(e)
         return False, str(e)
 
 
 def handle_exception(e) :
-    error_str = str(e)
-    tb = traceback.extract_tb(e.__traceback__)
-    filename = tb[-1].filename
-    lineno = tb[-1].lineno
-    logger.error(
-            f"Try to fresh rss failed: {error_str}; file name: {filename}, line: {lineno}"
-    )
-
-
-def contains_any(main_str, str_list) :
-    for sub_str in str_list :
-        if sub_str in main_str :
-            return True
-    return False
+    # 兼容原签名，但更稳健
+    try :
+        error_str = str(e)
+        tb = traceback.extract_tb(e.__traceback__) if e.__traceback__ else []
+        filename = tb[-1].filename if tb else "<unknown>"
+        lineno = tb[-1].lineno if tb else -1
+        logger.error(
+                f"Try to fresh rss failed: {error_str}; file name: {filename}, line: {lineno}"
+        )
+    finally :
+        logger.exception(e)
 
 
 async def analyze_item(item) :
-    item_title = item.title
-    should_skip, now_language = should_skip_item(item_title)
+    parseResult = ani.parse(item.title)
+    should_skip, now_language = should_skip_item(parseResult)
     if should_skip :
         return
-
-    origin_title = get_title(item_title)
-    if origin_title == "" :
-        return
-
+    title = parseResult.title
     mikan_url = item["link"].split(config.mikan_episode)[-1]
 
     if RssItemTable.check_item_exist(mikan_url) :
         return
 
-    bangumi_subject_id = RssItemTable.get_bangumi_id_by_anime_name(origin_title)
-    logger.info(f"add new torrent: {clear_title(item.title).replace('[1080p]', '').replace('[1080P]', '')}")
-    origin_title = get_title(item_title)
-    episode1, version1, episode2, version2 = get_episode(item_title)
-    if episode1 > 24 and bangumi_subject_id == 420628 :
-        bangumi_subject_id = 486347
-    if episode1 > 12 and bangumi_subject_id == 467461 :
-        bangumi_subject_id = 529431
-    if episode1 > 13 and bangumi_subject_id == 484623 :
-        episode1 -= 13
+    logger.info(f"add new torrent: {clear_title(item.title)}")
+
+    if parseResult.media_type is EnumMediaType.MultipleEpisode :
+        episode = parseResult.start_episode
+        version = 1
+    else :
+        episode = parseResult.episode
+        version = parseResult.version
+
+    bangumi_subject_id = RssItemTable.get_bangumi_id_by_anime_name(title)
+    bangumi_subject_id, episode = _apply_subject_fixes(bangumi_subject_id, episode)
     if bangumi_subject_id == -1 :
         bangumi_subject_id = await get_bangumi_url(item)
         if bangumi_subject_id == -1 :
             return
-        anime_info, item_info = await process_new_bangumi_item(item,
-                                                               bangumi_subject_id,
-                                                               episode1,
-                                                               origin_title,
-                                                               item_title,
-                                                               mikan_url, version1)
+        anime_info, item_info = await process_new_bangumi_item(
+                item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
     else :
-        anime_info, item_info = await process_existing_bangumi_item(item, item_title, mikan_url, bangumi_subject_id)
+        anime_info, item_info = await process_existing_bangumi_item(
+                item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
 
-    latest = RssItemTable.get_latest_episode_torrent(anime_info.id, episode1)
+    latest = RssItemTable.get_latest_episode_torrent(anime_info.id, episode)
     if now_language == 'baha' and latest is not None :
         return
-    hash_list = RssItemTable.get_episode_hashes(anime_info.id, episode1)
-    torrent_result = await download_mikan_torrent(item)
-    if not torrent_result[0] :
+
+    hash_list = RssItemTable.get_episode_hashes(anime_info.id, episode)
+    ok, torrent_path = await download_mikan_torrent(item)
+    if not ok :
         return
+
     for now_hash in hash_list :
         RssItemTable.finish_item_download(now_hash)
         delete_torrent_by_hash(now_hash)
-    await download_and_notify(torrent_result[1], anime_info, item_info, now_language)
+
+    await download_and_notify(torrent_path, anime_info, item_info, now_language)
 
 
-def should_skip_item(item_title) :
-    """
-    判断是否有filter的内容、以及语言是否正确
-    """
-    if contains_any(item_title, config.filters) :
+def should_skip_item(result: ParseResult) :
+    if result is None :
         return True, None
-
-    now_language = get_subtitle_language(item_title)
-    target_language = config.get_config("subtitle_language")
-
-    if now_language == 'baha' :
-        return False, 'baha'
-    if now_language == 'loli' :
-        return False, 'LoliHouse'
-    if now_language == 'snow' :
-        return False, 'snow'
-
-    if now_language != target_language :
+    if result.resolution is not EnumResolution.R1080p :
         return True, None
-
-    return False, now_language
+    if result.group.lower() == 'ani' :
+        return False, "baha"
+    if result.group.lower() == 'lolihouse' :
+        return False, "LoliHouse"
+    if result.language is EnumLanguage.JpSc or result.language is EnumLanguage.Sc :
+        return False, "Sc"
+    return True, None
 
 
 async def get_bangumi_url(item) :
@@ -136,14 +130,18 @@ async def get_bangumi_url(item) :
     bangumi_url = await get_bangumi_url_from_mikan(mikan_home_url[1])
     if not bangumi_url[0] :
         return -1
-    subject_id = int(bangumi_url[1].split("https://bgm.tv/subject/")[-1])
+    try :
+        subject_id = int(str(bangumi_url[1]).split("https://bgm.tv/subject/")[-1])
+    except Exception :
+        logger.error(f"parse subject id failed from url: {bangumi_url[1]}")
+        return -1
     return subject_id
 
 
 async def process_new_bangumi_item(item, subject_id, episode, origin_title, item_title, torrent_page_url, version) :
     anime_info = get_subject_info(subject_id)
     if anime_info is None :
-        return
+        return None, None
 
     item_name = universal_replace_name("file_name", anime_info, episode)
     pub_date = datetime_to_str(struct_time_to_datetime(item["published_parsed"]))
@@ -155,17 +153,16 @@ async def process_new_bangumi_item(item, subject_id, episode, origin_title, item
     return anime_info, item_info
 
 
-async def process_existing_bangumi_item(item, item_title, torrent_page_url, bangumi_id) :
-    origin_title = get_title(item_title)
-    episode1, version1, episode2, version2 = get_episode(item_title)
-    anime_info = BangumiTable.get_anime_info_by_id(bangumi_id)
+async def process_existing_bangumi_item(item, subject_id, episode, origin_title, item_title, torrent_page_url,
+                                        version) :
+    anime_info = BangumiTable.get_anime_info_by_id(subject_id)
     if not anime_info[0] :
-        return
+        return None, None
 
-    item_name = universal_replace_name("file_name", anime_info[1], episode1)
+    item_name = universal_replace_name("file_name", anime_info[1], episode)
     pub_date = datetime_to_str(struct_time_to_datetime(item["published_parsed"]))
-    item_info = RssItemInfo(item_name, origin_title, item_title, torrent_page_url, bangumi_id, episode1, pub_date, 0,
-                            version1)
+    item_info = RssItemInfo(item_name, origin_title, item_title, torrent_page_url, subject_id, episode, pub_date, 0,
+                            version)
 
     return anime_info[1], item_info
 
@@ -184,22 +181,54 @@ async def download_and_notify(torrent_path, anime_info, item_info, now_language)
 
 
 def determine_save_path(anime_info) :
-    if anime_info.now_type.value == 2 :
-        return f"{config.get_config('download_path')}/{config.get_config('anime_path')}"
+    base = config.get_config("download_path")
+    anime_path = config.get_config("anime_path")
+    toku_path = config.get_config("tokusatsu_path")
+    if getattr(anime_info.now_type, "value", None) == 2 :
+        return f"{base}/{anime_path}"
     else :
-        return f"{config.get_config('download_path')}/{config.get_config('tokusatsu_path')}"
+        return f"{base}/{toku_path}"
 
 
 async def download_mikan_torrent(item) :
-    for enclosure in item.enclosures :
-        if enclosure.type != "application/x-bittorrent" :
-            continue
-        torrent_url = enclosure["href"]
-        response = await download_file(torrent_url, "download")
-        if not response[0] :
-            logger.error(f"下载torrent文件失败: {response[1]}")
-            return False, response[1]
-        torrent_path = response[1]
-        logger.info(f"下载torrent文件, 路径:{torrent_path}")
-        return True, torrent_path
-    return False, "没有torrent链接"
+    try :
+        for enclosure in getattr(item, "enclosures", []) :
+            if enclosure.get("type") != "application/x-bittorrent" :
+                continue
+            torrent_url = enclosure.get("href")
+            if not torrent_url :
+                continue
+
+            resp = await download_file(torrent_url, "download")
+            if not resp[0] :
+                logger.error(f"下载torrent文件失败: {resp[1]}")
+                return False, resp[1]
+            torrent_path = resp[1]
+            logger.info(f"下载torrent文件, 路径:{torrent_path}")
+            return True, torrent_path
+        return False, "没有torrent链接"
+    except Exception as e :
+        handle_exception(e)
+        return False, str(e)
+
+
+def _apply_subject_fixes(subject_id: int, episode: int) -> Tuple[int, int] :
+    """
+    特例修正集中管理：
+    - (ep>24 且 420628) -> 486347
+    - (ep>12 且 467461) -> 529431
+    - (id==484623 且 ep>13) -> ep-=13
+    """
+    replace_rules = (
+        (24, 420628, 486347),
+        (12, 467461, 529431),
+    )
+    for ep_th, old_id, new_id in replace_rules :
+        if episode > ep_th and subject_id == old_id :
+            subject_id = new_id
+            break
+
+    if episode > 13 and subject_id == 484623 :
+        episode -= 13
+
+    return subject_id, episode

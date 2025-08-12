@@ -1,4 +1,6 @@
 import feedparser
+from pyaniparser import AniParser
+from pyaniparser.types import EnumMediaType
 
 from app import config
 from app.controllers.mikan_controller import download_and_notify, handle_exception, process_existing_bangumi_item, \
@@ -6,9 +8,9 @@ from app.controllers.mikan_controller import download_and_notify, handle_excepti
 from app.models.sql import BangumiTable, RssItemTable
 from app.utils.log_utils import set_up_logger
 from app.utils.net_utils import download_file, fetch
-from app.utils.parser.title_parser import get_episode, get_title
 
 logger = set_up_logger(__name__)
+parser = AniParser()
 
 
 async def fresh_rss() :
@@ -37,7 +39,8 @@ async def analyze_item(item, subject_id) :
     if should_skip :
         return
 
-    origin_title = get_title(item_title)
+    parseResult = parser.parse(item_title)
+    origin_title = parseResult.title
     if origin_title == "" :
         return
     moe_url = ''
@@ -53,15 +56,20 @@ async def analyze_item(item, subject_id) :
         return
 
     logger.info(f"add new torrent: {item.title}")
-    origin_title = get_title(item_title)
-    episode1, version1, episode2, version2 = get_episode(item_title)
+    if parseResult.media_type is EnumMediaType.MultipleEpisode :
+        episode = parseResult.start_episode
+    else :
+        episode = parseResult.episode
+    version = parseResult.version
 
     if BangumiTable.check_anime_exists(subject_id) :
-        anime_info, item_info = await process_existing_bangumi_item(item, item_title, moe_url, subject_id)
+        anime_info, item_info = await process_existing_bangumi_item(item, subject_id, episode, origin_title,
+                                                                    item_title,
+                                                                    moe_url, version)
     else :
-        anime_info, item_info = await process_new_bangumi_item(item, subject_id, episode1, origin_title,
+        anime_info, item_info = await process_new_bangumi_item(item, subject_id, episode, origin_title,
                                                                item_title,
-                                                               moe_url, version1)
+                                                               moe_url, version)
     torrent_result = await download_moe_torrent(item)
     if not torrent_result[0] :
         return

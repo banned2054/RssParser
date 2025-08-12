@@ -1,72 +1,13 @@
 import re
 
+from pyaniparser import AniParser
+
 from app import config
-from app.models.enum.enum_language import EnumLanguage
-from app.plugin.ani_parser import AniParser
-from app.plugin.nekomoe_parser import NekoMoeParser
-from app.plugin.prejudice_studio_parser import PrejudiceStudioParser
-from app.plugin.sakura_hana_parser import SakuraHanaParser
-from app.plugin.sakurato_parser import SakuratoParser
-from app.plugin.sweet_sub_parser import SweetSubParser
 from app.utils.log_utils import set_up_logger
 
 logger = set_up_logger(__name__)
 
 ani = AniParser()
-neko_moe = NekoMoeParser()
-prejudice_studio = PrejudiceStudioParser()
-sakura_hana = SakuraHanaParser()
-sakurato = SakuratoParser()
-sweet_sub = SweetSubParser()
-parser_list = [
-    ani,
-    neko_moe,
-    prejudice_studio,
-    sakura_hana,
-    sakurato,
-    sweet_sub,
-]
-RULES = [
-    r"(.*) - (\d{1,4}(?!\d|p)|\d{1,4}\.\d{1,2})(?:v(\d{1,2}))?(?:-\d{1,4}(?:v\d{1,2})?)?(?: )?(?:END)?(.*)",
-    r"(.*)[\[\ E](\d{1,4}|\d{1,4}\.\d{1,2})(?:v(\d{1,2}))?(?:-\d{1,4}(?:v\d{1,2})?)?(?: )?(?:END)?[\]\ ](.*)",
-    r"(.*)\[(?:第)?(\d+|\d+\.\d+)[话集話](?:-\d+(?:v\d{1,2})?)?(?:END)?\](.*)",
-    r"(.*)第?(\d+|\d+\.\d+)[话話集](?:-\d+(?:v\d{1,2})?)?(?:END)?(.*)",
-    r"(.*)(?:S\d{2})?EP?(\d+)(?:-\d+(?:v\d{1,2})?)?(.*)",
-    r"(.*) - (\d{1,4})(?:\s*\(.*?\))?(?:\s*\[.*?\])?(?:\.mp4)?"
-]
-
-SUBTITLE_LANG = {
-    "zh-tc"        : ["tc", "cht", "繁体", "繁日", "繁中", "zh-tw", "big5", "baha"],
-    "zh-sc"        : ["sc", "chs", "简体", "简日", "简中", "zh", "gb"],
-    "zh-sc-and-tc" : ["繁简", "简繁"],
-}
-
-
-def get_subtitle_language(subtitle_name: str) -> str | None :
-    result = parser_with_ani_parser(subtitle_name)
-    if result is not None :
-        if result.group is 'ANi' :
-            return 'baha'
-        if result.language is EnumLanguage.JpScTc :
-            return "zh-sc-and-tc"
-        if result.language is EnumLanguage.JpSc :
-            return "zh-sc"
-        if result.language is EnumLanguage.JpTc :
-            return "zh-tc"
-        if result.language is EnumLanguage.Sc :
-            return "zh-sc"
-        if result.language is EnumLanguage.Tc :
-            return "zh-tc"
-    subtitle_name_lower = subtitle_name.lower()
-    if 'lolihouse' in subtitle_name_lower :
-        return 'loli'
-    if '雪飘工作室' in subtitle_name :
-        return 'snow'
-    for key, values in SUBTITLE_LANG.items() :
-        for v in values :
-            if v in subtitle_name_lower :
-                return key
-    return None
 
 
 def clear_title(origin_title: str) -> str :
@@ -89,59 +30,6 @@ def clear_title(origin_title: str) -> str :
         result = result.replace(old, new)
 
     return result.strip()
-
-
-def get_title_first_step(origin_title: str) -> str :
-    cleared_title = clear_title(origin_title)
-    parts = [s for s in re.split(r"[\[\]()【】（）]", cleared_title) if s]
-    if len(parts) > 1 :
-        if re.match(r"\d+", parts[1]) :
-            return cleared_title
-        return parts[1]
-    return parts[0]
-
-
-def get_title(origin_title: str) -> str :
-    contains_list = config.get_config("contain_filter").split("|")
-    for contain_word in contains_list :
-        if contain_word.lower() not in origin_title.lower() :
-            return ""
-    for rule in RULES :
-        match = re.match(rule, origin_title, re.I)
-        if not match or not match.group(1) :
-            continue
-        base_title = get_title_first_step(match.group(1)).strip()
-        return base_title.split("/")[0].strip()
-    return ""
-
-
-def get_episode(origin_title: str) :
-    result = parser_with_ani_parser(origin_title)
-    if result is not None :
-        if result.is_multiple :
-            return result.start_episode, 1, result.end_episode, 1
-        return result.episode, result.version, -1, -1
-    cleared_title = clear_title(origin_title)
-    for rule in RULES :
-        if not cleared_title :
-            continue
-        match = re.match(rule, cleared_title, re.I)
-        if not match :
-            continue
-
-        episode1 = match.group(2)
-        version1 = match.group(3) if match.lastindex and match.lastindex >= 3 and match.group(3) else 1
-
-        ep2_match = re.search(r'-(\d{1,4})(?:v(\d{1,2}))?', match.group(0))
-        if ep2_match :
-            episode2 = ep2_match.group(1)
-            version2 = ep2_match.group(2) if ep2_match.group(2) else 1
-        else :
-            episode2, version2 = -1, -1
-
-        return int(episode1), int(version1), int(episode2), int(version2)
-
-    return -1, -1, -1, -1
 
 
 def universal_replace_name(target, anime_info, episode = None) :
@@ -173,11 +61,3 @@ def clear_title_for_tag(origin_title: str) -> str :
     result = re.sub(r'[\[(【)\]】）]', "", result)
     result = re.sub(r"_+", "_", result)
     return result.strip("_")
-
-
-def parser_with_ani_parser(title: str) :
-    for parser in parser_list :
-        result = parser.try_match(title)
-        if result[0] :
-            return result[1]
-    return None
