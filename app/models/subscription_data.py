@@ -2,6 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class subscription_data :
+class SubscriptionData :
     rss_url: str
     subject_id: int
