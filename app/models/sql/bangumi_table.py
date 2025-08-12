@@ -1,20 +1,25 @@
 from contextlib import contextmanager
+from datetime import date
+from typing import Optional
 
-from sqlalchemy import Column, Date, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Date, Integer, String, create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 from app import config
 from app.models.bangumi_subject_info import BangumiSubjectInfo, BangumiType
 
-Base = declarative_base()
+
+# 2.0 风格的 Base
+class Base(DeclarativeBase) :
+    pass
+
 
 # 设置 MySQL 数据库连接
-DATABASE_URL = f'mysql+pymysql://{config.mysql_username}:{config.REDACTED_MYSQL_PASSWORD}@{config.mysql_url}/anime'
+DATABASE_URL = f"mysql+pymysql://{config.mysql_username}:{config.REDACTED_MYSQL_PASSWORD}@{config.mysql_url}/anime"
 engine = create_engine(
         DATABASE_URL,
-        pool_recycle = 1800,  # 30 分钟后重新回收连接
-        pool_pre_ping = True  # 在使用前检查连接是否可用
+        pool_recycle = 1800,
+        pool_pre_ping = True,
 )
 Session = sessionmaker(bind = engine)
 
@@ -25,9 +30,9 @@ def get_session() :
     try :
         yield session
         session.commit()
-    except Exception as e :
+    except Exception :
         session.rollback()
-        raise e
+        raise
     finally :
         session.close()
 
@@ -35,13 +40,13 @@ def get_session() :
 class BangumiInfo(Base) :
     __tablename__ = 'bangumi_info'
 
-    bangumi_id = Column(Integer, primary_key = True, nullable = False)
-    platform = Column(String)
-    image_url = Column(String)
-    origin_name = Column(String)
-    cn_name = Column(String)
-    now_type = Column(Integer)
-    pubdate = Column(Date)
+    bangumi_id: Mapped[int] = mapped_column(Integer, primary_key = True, nullable = False)
+    platform: Mapped[str] = mapped_column(String, nullable = False)
+    image_url: Mapped[str] = mapped_column(String, nullable = False)
+    origin_name: Mapped[str] = mapped_column(String, nullable = False)
+    cn_name: Mapped[str] = mapped_column(String, nullable = False)
+    now_type: Mapped[int] = mapped_column(Integer, nullable = False)
+    pubdate: Mapped[date] = mapped_column(Date, nullable = False)
 
 
 class BangumiTable :
@@ -75,7 +80,7 @@ class BangumiTable :
     def get_anime_info_by_id(bangumi_id: int) :
         BangumiTable.create_bangumi_table_if_not_exists()
         with get_session() as session :
-            result = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first()
+            result: Optional[BangumiInfo] = session.get(BangumiInfo, bangumi_id)
             if result :
                 bangumi_info = BangumiSubjectInfo(
                         id = result.bangumi_id,
@@ -96,8 +101,7 @@ class BangumiTable :
         with get_session() as session :
             result = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first()
             if result :
-                cn_name = result.cn_name
-                return True, cn_name
+                return True, result.cn_name
             else :
                 return False, None
 
@@ -105,5 +109,4 @@ class BangumiTable :
     def check_anime_exists(bangumi_id: int) :
         BangumiTable.create_bangumi_table_if_not_exists()
         with get_session() as session :
-            exists = session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first() is not None
-            return exists
+            return session.query(BangumiInfo).filter_by(bangumi_id = bangumi_id).first() is not None
