@@ -10,3 +10,4 @@ qbittorrent-api
 requests
 python-telegram-bot
 gotify
+pyaniparser
