@@ -91,5 +91,5 @@ def set_up_logger(logger_name, loglevel = logging.DEBUG) :
     生成特定的logger
     :return:
     """
-    logger = CustomLogger(logger_name, "log", config.get_config("TZ"), loglevel)
+    logger = CustomLogger(logger_name, "log", config.get_config("timezone"), loglevel)
     return logger
