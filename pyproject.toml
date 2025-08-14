@@ -1,0 +1,17 @@
+[project]
+name = "rssparser"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = ["requests",
+    "pytz",
+    "aiohttp",
+    "SQLAlchemy",
+    "feedparser",
+    "beautifulsoup4",
+    "bencodepy",
+    "pymysql",
+    "qbittorrent-api",
+    "python-telegram-bot",
+    "gotify",
+    "pyaniparser"]
