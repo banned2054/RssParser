@@ -31,7 +31,7 @@ async def fresh_rss() :
         ok, data = await fetch(rss_url)
         if not ok :
             raise Exception(f"fetch rss failed: {data}")
-
+        logger.info(f"fetch mikan rss")
         feed = feedparser.parse(data)
         if getattr(feed, "bozo", 0) :
             err = getattr(feed, "bozo_exception", None)
