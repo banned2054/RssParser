@@ -2,7 +2,6 @@ import asyncio
 import logging
 import multiprocessing as mp
 import signal
-import sys
 import time
 from multiprocessing.synchronize import Event as MpEvent  # 关键：正确的类型
 
@@ -10,6 +9,20 @@ from app import config
 from app.controllers import bangumi_controller, mikan_controller, temp_controller
 from app.controllers.torrent_controller import process_unfinished_downloads
 from app.utils.file_utils import create_directory_if_not_exists
+
+
+async def _run_with_timeout(coro, name: str, timeout: float) :
+    t0 = time.time()
+    try :
+        return await asyncio.wait_for(coro, timeout = timeout)
+    except asyncio.TimeoutError :
+        logging.error("RSS 子任务超时: %s (>%ss)", name, timeout)
+        return TimeoutError(f"{name} timed out")
+    except Exception as e :
+        logging.exception("RSS 子任务异常: %s", name, exc_info = e)
+        return e
+    finally :
+        logging.info("RSS 子任务完成: %s, 用时 %.2fs", name, time.time() - t0)
 
 
 # ---------------- workers (async) ----------------
@@ -24,27 +37,31 @@ async def _wait_or_shutdown(shutdown_event: MpEvent, timeout: float) -> bool :
 
 
 async def rss_worker(shutdown_event: MpEvent, interval_sec: int) -> None :
+    _child_ignore_sigint()  # ← 放到最开头
     interval_sec = max(1, int(interval_sec))
+    logging.info("RSS worker 启动，周期 %ss", interval_sec)
     try :
         while not shutdown_event.is_set() :
             results = await asyncio.gather(
-                    mikan_controller.fresh_rss(),
-                    bangumi_controller.fresh_rss(),
-                    temp_controller.fresh_rss(),
+                    _run_with_timeout(mikan_controller.fresh_rss(), "mikan", 120),
+                    _run_with_timeout(bangumi_controller.fresh_rss(), "bangumi", 120),
+                    _run_with_timeout(temp_controller.fresh_rss(), "temp", 120),
                     return_exceptions = True
             )
             for r in results :
                 if isinstance(r, Exception) :
-                    logging.exception("RSS 刷新子任务异常", exc_info = r)
+                    logging.error("RSS 一项失败: %r", r)
 
             if await _wait_or_shutdown(shutdown_event, interval_sec) :
                 break
     except asyncio.CancelledError :
-        # 优雅退出，不打印堆栈
         pass
+    finally :
+        logging.info("RSS worker 退出")
 
 
 async def torrent_worker(shutdown_event: MpEvent, interval_sec: int) -> None :
+    _child_ignore_sigint()  # ← 放到最开头
     interval_sec = max(1, int(interval_sec))
     try :
         while not shutdown_event.is_set() :
@@ -105,11 +122,7 @@ def main() -> None :
     )
     create_directory_if_not_exists("download")
 
-    # Windows 用 spawn；POSIX 用默认
-    if sys.platform.startswith("win") :
-        ctx = mp.get_context("spawn")
-    else :
-        ctx = mp.get_context()
+    ctx = mp.get_context("spawn")
 
     shutdown = ctx.Event()
 
