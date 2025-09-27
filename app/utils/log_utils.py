@@ -77,10 +77,6 @@ class CustomLogger :
     def critical(self, msg, *args, **kwargs) :
         self.logger.critical(msg, *args, **kwargs)
 
-    def exception(self, msg, *args, **kwargs) :
-        """兼容 logging.Logger.exception，自动带 traceback"""
-        self.logger.error(msg, *args, exc_info = True, **kwargs)
-
     def check_or_update_file_handler(self) :
         """兼容你原来的调用点：每次 log 前可以调用它保证切日"""
         self._ensure_file_handler()
