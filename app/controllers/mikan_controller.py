@@ -56,7 +56,7 @@ def handle_exception(e) :
                 f"Try to fresh rss failed: {error_str}; file name: {filename}, line: {lineno}"
         )
     finally :
-        logger.exception(e)
+        logger.exception("Exception occurred", exc_info = e)
 
 
 async def analyze_item(item) :
