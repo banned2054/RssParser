@@ -16,5 +16,5 @@ dependencies = [
     "pytz",
     "qbittorrent-api",
     "requests",
-    "SQLAlchemy",
+    "sqlalchemy",
 ]
