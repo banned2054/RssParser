@@ -3,17 +3,18 @@ name = "rssparser"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
-dependencies = ["requests",
-    "pytz",
+dependencies = [
     "aiohttp",
-    "SQLAlchemy",
-    "feedparser",
     "beautifulsoup4",
     "bencodepy",
-    "pymysql",
-    "qbittorrent-api",
-    "python-telegram-bot",
+    "cryptography",
+    "feedparser",
     "gotify",
     "pyaniparser",
-    "cryptography"
-    ]
+    "pymysql",
+    "python-telegram-bot",
+    "pytz",
+    "qbittorrent-api",
+    "requests",
+    "SQLAlchemy",
+]
