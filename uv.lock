@@ -615,11 +615,14 @@ wheels = [
 
 [[package]]
 name = "pyaniparser"
-version = "0.0.3"
+version = "0.0.6"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/7b/dc/2a9099f947102d3b06713de1bb3a66f64db32bb994c37429f1faef9f5b2e/pyaniparser-0.0.3.tar.gz", hash = "sha256:36d7079185ae8175b0a6b975a9ba467e4748a1717ee93524a5bab2311dba15e2", size = 6785090, upload-time = "2025-11-13T07:17:05.339Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bd/0b/fe46f97f18b043e99457239afa4e276c16e96f52e19dd5526708d4ad1a70/pyaniparser-0.0.3-py3-none-any.whl", hash = "sha256:eb88e1569cf54ca6cbecb71c0682babf7ebf0f5ea19adaa09a009e443a0b64ab", size = 6813491, upload-time = "2025-11-13T07:17:03.583Z" },
+    { url = "https://files.pythonhosted.org/packages/ec/09/628a6102c0c78689b096bec4440ee25c3ef64b8d0bbc345086f1424129a4/pyaniparser-0.0.6-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:03af76cebc7fa17ed3ad8ca3e49463427fe52783adb89192a3e862b87f91eacf", size = 1787403, upload-time = "2025-11-17T02:26:18.34Z" },
+    { url = "https://files.pythonhosted.org/packages/b2/d6/27cb5f3b9916121fe8fe27b44d0c1fa682f80f38427fe005df2477ff50cc/pyaniparser-0.0.6-py3-none-macosx_11_0_arm64.whl", hash = "sha256:a8e06276442a92a3d7853e2fc04b110279f4a94db3d70185497945f5db050d6a", size = 1593792, upload-time = "2025-11-17T02:26:20.341Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/29/0af0966f28fa598b1d0dd13aae8a164f0e186c47d0667707189c7a8f5409/pyaniparser-0.0.6-py3-none-manylinux_2_17_aarch64.whl", hash = "sha256:6c1f94e3d5e821c3616955c42ea8ec11e00b73ff98b3e094165e0b32742d2733", size = 1646348, upload-time = "2025-11-17T02:26:22.324Z" },
+    { url = "https://files.pythonhosted.org/packages/71/13/3f5cfbb3bef9cfd838dc1b2805fa1d72670324373a43356beb721ee1cf58/pyaniparser-0.0.6-py3-none-manylinux_2_17_x86_64.whl", hash = "sha256:970f85da553b245cbdfd254f7c4922fe94dc5eab607940cf1ca1ce9a7dd42419", size = 1795707, upload-time = "2025-11-17T02:26:24.084Z" },
+    { url = "https://files.pythonhosted.org/packages/15/8b/eb9d48cddfc5b2ad5e050b97a7e10873407e6cc637f322562126956d588f/pyaniparser-0.0.6-py3-none-win_amd64.whl", hash = "sha256:cdaeba8f79467f5030f9a900fc79307a12d01708f61a916022357c439b550304", size = 1684107, upload-time = "2025-11-17T02:26:25.562Z" },
 ]
 
 [[package]]
@@ -663,16 +666,16 @@ wheels = [
 
 [[package]]
 name = "qbittorrent-api"
-version = "2025.11.0"
+version = "2025.11.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/37/b4/3e4b1b73ccc7aa8d820f27512236580cdf77d4bc6bf2528cfeb5a53c1cad/qbittorrent_api-2025.11.0.tar.gz", hash = "sha256:9daacbc9b44012a0ac6da076b9a2a2bfed445034bd5e2c10ae4599b691e77972", size = 1323092, upload-time = "2025-11-11T06:17:23.097Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/63/b4/506b0296fd17d90cb2185149b4fa576645c6fd26397684bfb0806a35435b/qbittorrent_api-2025.11.1.tar.gz", hash = "sha256:5cb2a469f8bc95f616e03bd0259d8b4be60a5c3df0d49910c44309b0f59724c4", size = 1323104, upload-time = "2025-11-20T07:34:50.263Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/57/1a/66cd2daf0aa7c6809e2ff664b28d81e3381575cb96a4fe2a1410a3823ad3/qbittorrent_api-2025.11.0-py3-none-any.whl", hash = "sha256:99f877df8e064f672624e6665bb79d4ceec3d3db8a00bf2fa2e8a6cd9241d2f6", size = 67034, upload-time = "2025-11-11T06:17:21.556Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/c5/b77517fb2179ec640034ed8850fee9f9dcff457daef7aeebaf6463cf962d/qbittorrent_api-2025.11.1-py3-none-any.whl", hash = "sha256:6e60f1daa25232d48753d0e6860b0684092910b3fe16fbe449be7fa31caa687a", size = 67042, upload-time = "2025-11-20T07:34:48.684Z" },
 ]
 
 [[package]]
