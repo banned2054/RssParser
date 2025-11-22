@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import multiprocessing as mp
+import os
 import signal
 import time
 from multiprocessing.synchronize import Event as MpEvent  # 关键：正确的类型
@@ -123,21 +124,25 @@ def main() -> None :
     create_directory_if_not_exists("download")
 
     ctx = mp.get_context("spawn")
-
-    shutdown = ctx.Event()
+    shutdown: MpEvent = ctx.Event()
 
     procs = [
         ctx.Process(target = run_rss, name = "RSSWorker", args = (shutdown,), daemon = False),
-        ctx.Process(target = run_torrent, name = "TorrentWorker", args = (shutdown,), daemon = False)
+        ctx.Process(target = run_torrent, name = "TorrentWorker", args = (shutdown,), daemon = False),
     ]
 
-    # 让子进程忽略 SIGINT
     for p in procs :
         p.start()
-        _ = None  # 占位
 
-    # 父进程专门处理 Ctrl+C：设置 shutdown 并等待子进程退出
+    # --- 信号处理 ---
     def _on_sigint(signum, frame) :
+        if shutdown.is_set() :
+            # 第二次 Ctrl+C：直接暴力退出
+            logging.warning("再次收到 Ctrl+C，立即强制退出进程")
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            os.kill(os.getpid(), signal.SIGINT)
+            return
+
         logging.info("收到 Ctrl+C，开始优雅退出…")
         shutdown.set()
 
@@ -145,21 +150,17 @@ def main() -> None :
     signal.signal(signal.SIGINT, _on_sigint)
 
     try :
-        # 轮询等待，避免 join() 在 SIGINT 到来时阻塞得难看
         while any(p.is_alive() for p in procs) :
             time.sleep(0.2)
     finally :
-        # 还原信号处理器
         try :
             signal.signal(signal.SIGINT, prev)
         except Exception :
             pass
 
-        # 给 10 秒优雅退出时间
         for p in procs :
             p.join(timeout = 10)
 
-        # 兜底强杀仍存活的进程
         for p in procs :
             if p.is_alive() :
                 logging.warning("进程仍存活，执行强制终止: %s", p.name)
