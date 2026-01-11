@@ -10,7 +10,7 @@ dependencies = [
     "cryptography",
     "feedparser",
     "gotify",
-    "pyaniparser",
+    "pyaniparser==0.3.0",
     "pymysql",
     "python-telegram-bot",
     "pytz",

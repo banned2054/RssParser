@@ -53,7 +53,7 @@ def handle_exception(e) :
         filename = tb[-1].filename if tb else "<unknown>"
         lineno = tb[-1].lineno if tb else -1
         logger.error(
-                f"Try to fresh rss failed: {error_str}; file name: {filename}, line: {lineno}"
+            f"Try to fresh rss failed: {error_str}; file name: {filename}, line: {lineno}"
         )
     finally :
         logger.error("Exception occurred")
@@ -86,10 +86,10 @@ async def analyze_item(item) :
         if bangumi_subject_id == -1 :
             return
         anime_info, item_info = await process_new_bangumi_item(
-                item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
+            item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
     else :
         anime_info, item_info = await process_existing_bangumi_item(
-                item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
+            item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
 
     latest = RssItemTable.get_latest_episode_torrent(anime_info.id, episode)
     if now_language == 'baha' and latest is not None :
@@ -220,8 +220,8 @@ def _apply_subject_fixes(subject_id: int, episode: int) -> Tuple[int, int] :
     - (id==484623 且 ep>13) -> ep-=13
     """
     replace_rules = (
-        (24, 420628, 486347),
-        (12, 467461, 529431),
+            (24, 420628, 486347),
+            (12, 467461, 529431),
     )
     for ep_th, old_id, new_id in replace_rules :
         if episode > ep_th and subject_id == old_id :

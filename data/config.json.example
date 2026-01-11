@@ -7,7 +7,7 @@
     "gotify_start_download_token"  : "REDACTED_GOTIFY_TOKEN_3",
     "gotify_url"                   : "REDACTED_GOTIFY_URL",
     "interval_time_to_rss"         : "300",
-    "mikan_rss_url"                : "https://mikanani.m/RSS/MyBangumi?token=YOUR_MIKAN_TOKEN",
+    "mikan_rss_url"                : "https://mikanani.me/RSS/MyBangumi?token=YOUR_MIKAN_TOKEN",
     "proxy_url"                    : "http://127.0.0.1:7890",
     "qbittorrent_name"             : "[/type/]/cn_name/ E/episode/",
     "qbittorrent_password"         : "YOUR_PASSWORD",

@@ -93,7 +93,7 @@ async def fetch(url, headers = None, method = "GET", json = None, retries = 3, t
                     filename = tb[-1].filename
                     lineno = tb[-1].lineno
                     logger.error(
-                            f"Failed to fetch {url}, error: {error_str}; file name: {filename}, line: {lineno}"
+                        f"Failed to fetch {url}, error: {error_str}; file name: {filename}, line: {lineno}"
                     )
                     return False, f"Fetch data failed, error: {error_str}"
                 else :
