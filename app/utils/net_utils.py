@@ -1,3 +1,4 @@
+import asyncio
 import html
 import os
 import traceback
@@ -98,3 +99,40 @@ async def fetch(url, headers = None, method = "GET", json = None, retries = 3, t
                     return False, f"Fetch data failed, error: {error_str}"
                 else :
                     logger.error(f"Failed to fetch {url}, try again.")
+    return None
+
+
+async def fetch_xml(url, headers = None, retries = 3, timeout = 10) :
+    """
+    专门用于获取 XML/RSS 数据的异步函数，保持原始转义字符不被破坏
+    """
+    proxy = config.get_config("proxy_url")
+    client_timeout = aiohttp.ClientTimeout(total = timeout)
+
+    while retries > 0 :
+        async with aiohttp.ClientSession(timeout = client_timeout) as session :
+            try :
+                async with session.request(
+                        method = "GET",
+                        url = url,
+                        headers = headers,
+                        proxy = proxy,
+                        ssl = False
+                ) as resp :
+                    if resp.status == 200 :
+                        # 重点：直接获取文本，不要使用 html.unescape
+                        # XML 的转义字符（如 &amp;）应由 feedparser 处理
+                        text = await resp.text()
+                        return True, text
+                    else :
+                        raise Exception(f"Cannot fetch XML, status code: {resp.status}")
+            except Exception as e :
+                retries -= 1
+                if retries == 0 :
+                    error_str = str(e)
+                    logger.error(f"Failed to fetch XML {url}, error: {error_str}")
+                    return False, f"Fetch XML failed: {error_str}"
+                else :
+                    logger.warning(f"Failed to fetch XML {url}, retrying... ({retries} left)")
+                    await asyncio.sleep(1)  # 重试前稍作等待
+    return None

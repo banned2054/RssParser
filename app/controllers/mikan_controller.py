@@ -9,7 +9,7 @@ from app import config
 from app.models.mikan_rss_info import RssItemInfo
 from app.models.sql import BangumiTable, RssItemTable
 from app.utils.log_utils import set_up_logger
-from app.utils.net_utils import download_file, fetch
+from app.utils.net_utils import download_file, fetch_xml
 from app.utils.parser.bangumi_parser import get_subject_info
 from app.utils.parser.mikan_parser import get_anime_home_url_from_mikan, get_bangumi_url_from_mikan
 from app.utils.parser.title_parser import clear_title, universal_replace_name
@@ -28,7 +28,7 @@ async def fresh_rss() :
         if not rss_url :
             raise Exception("rss link is empty")
 
-        ok, data = await fetch(rss_url)
+        ok, data = await fetch_xml(rss_url)
         if not ok :
             raise Exception(f"fetch rss failed: {data}")
         logger.info(f"fetch mikan rss")
