@@ -9,7 +9,7 @@ from app import config
 from app.models.mikan_rss_info import RssItemInfo
 from app.models.sql import BangumiTable, RssItemTable
 from app.utils.log_utils import set_up_logger
-from app.utils.net_utils import download_file, fetch
+from app.utils.net_utils import download_file, fetch_xml
 from app.utils.parser.bangumi_parser import get_subject_info
 from app.utils.parser.mikan_parser import get_anime_home_url_from_mikan, get_bangumi_url_from_mikan
 from app.utils.parser.title_parser import clear_title, universal_replace_name
@@ -28,7 +28,7 @@ async def fresh_rss() :
         if not rss_url :
             raise Exception("rss link is empty")
 
-        ok, data = await fetch(rss_url)
+        ok, data = await fetch_xml(rss_url)
         if not ok :
             raise Exception(f"fetch rss failed: {data}")
         logger.info(f"fetch mikan rss")
@@ -53,7 +53,7 @@ def handle_exception(e) :
         filename = tb[-1].filename if tb else "<unknown>"
         lineno = tb[-1].lineno if tb else -1
         logger.error(
-                f"Try to fresh rss failed: {error_str}; file name: {filename}, line: {lineno}"
+            f"Try to fresh rss failed: {error_str}; file name: {filename}, line: {lineno}"
         )
     finally :
         logger.error("Exception occurred")
@@ -86,10 +86,10 @@ async def analyze_item(item) :
         if bangumi_subject_id == -1 :
             return
         anime_info, item_info = await process_new_bangumi_item(
-                item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
+            item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
     else :
         anime_info, item_info = await process_existing_bangumi_item(
-                item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
+            item, bangumi_subject_id, episode, title, item.title, mikan_url, version)
 
     latest = RssItemTable.get_latest_episode_torrent(anime_info.id, episode)
     if now_language == 'baha' and latest is not None :
@@ -220,8 +220,8 @@ def _apply_subject_fixes(subject_id: int, episode: int) -> Tuple[int, int] :
     - (id==484623 且 ep>13) -> ep-=13
     """
     replace_rules = (
-        (24, 420628, 486347),
-        (12, 467461, 529431),
+            (24, 420628, 486347),
+            (12, 467461, 529431),
     )
     for ep_th, old_id, new_id in replace_rules :
         if episode > ep_th and subject_id == old_id :

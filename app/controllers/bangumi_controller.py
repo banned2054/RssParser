@@ -7,7 +7,7 @@ from app.controllers.mikan_controller import download_and_notify, handle_excepti
     process_new_bangumi_item, should_skip_item
 from app.models.sql import BangumiTable, RssItemTable
 from app.utils.log_utils import set_up_logger
-from app.utils.net_utils import download_file, fetch
+from app.utils.net_utils import download_file, fetch_xml
 
 logger = set_up_logger(__name__)
 parser = AniParser()
@@ -18,7 +18,7 @@ async def fresh_rss() :
         subscription_list = config.bangumi_subscription
         for subscription in subscription_list :
             # 访问rss链接，并解析
-            rss_page = await fetch(subscription.rss_url)
+            rss_page = await  fetch_xml(subscription.rss_url)
             logger.info("fetch rss")
             feed = feedparser.parse(rss_page[1])
 
