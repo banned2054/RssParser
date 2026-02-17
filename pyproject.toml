@@ -4,17 +4,17 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
-    "aiohttp",
-    "beautifulsoup4",
+    "aiohttp==3.13.3",
+    "beautifulsoup4==4.14.3",
     "bencodepy",
-    "cryptography",
+    "cryptography==46.0.5",
     "feedparser",
     "gotify",
-    "pyaniparser",
+    "pyaniparser==0.3.1",
     "pymysql",
-    "python-telegram-bot",
+    "python-telegram-bot==22.6",
     "pytz",
     "qbittorrent-api",
     "requests",
-    "sqlalchemy",
+    "sqlalchemy==2.0.46",
 ]
