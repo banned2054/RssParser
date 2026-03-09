@@ -1,7 +1,9 @@
 import asyncio
+from typing import Any
 
 from app import config
 from app.models.sql import BangumiTable, RssItemTable
+from app.models.mikan_rss_info import RssItemInfo
 from app.utils.gotify_utils import send_gotify
 from app.utils.jellyfin_utils import fresh_anime_library
 from app.utils.log_utils import set_up_logger
@@ -14,7 +16,7 @@ logger = set_up_logger(__name__)
 RETRY_DELAY = 60  # 秒
 
 
-async def handle_single_download(unfinished_download_hash) :
+async def handle_single_download(unfinished_download_hash: str) -> None :
     """处理单个下载项"""
     try :
         result = check_torrent_finish_download(unfinished_download_hash)
@@ -37,7 +39,7 @@ async def handle_single_download(unfinished_download_hash) :
         logger.error(f"处理单个下载失败: {e}")
 
 
-async def send_download_complete_message(item) :
+async def send_download_complete_message(item: RssItemInfo) -> None :
     """发送下载完成的消息"""
     try :
         bangumi_subject_id = item.bangumi_id
@@ -51,7 +53,7 @@ async def send_download_complete_message(item) :
         logger.error(f"发送下载完成消息失败: {e}")
 
 
-async def process_unfinished_downloads() :
+async def process_unfinished_downloads() -> None :
     while True :
         try :
             unfinished_download_hash_list = RssItemTable.get_not_finished_download_item()
