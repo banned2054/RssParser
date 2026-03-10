@@ -76,7 +76,7 @@ class Config :
         # 读取 MySQL 配置（保持原有三个公开属性名）
         self.mysql_url: str = str(self._sql_data.get("mysql_url", ""))
         self.mysql_username: str = str(self._sql_data.get("mysql_username", ""))
-        self.REDACTED_MYSQL_PASSWORD: str = str(self._sql_data.get("REDACTED_MYSQL_PASSWORD", ""))
+        self.REDACTED_MYSQL_PASSWORD: str = str(self._sql_data.get("mysql_password", ""))
 
         self.get_bangumi_moe_subscription()
 

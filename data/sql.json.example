@@ -1,5 +1,5 @@
 {
-    "mysql_url"      : "",
-    "mysql_username" : "",
-    "REDACTED_MYSQL_PASSWORD" : ""
+    "mysql_url": "",
+    "mysql_username": "",
+    "mysql_password": ""
 }
