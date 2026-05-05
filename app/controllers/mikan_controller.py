@@ -61,6 +61,8 @@ def handle_exception(e) :
 
 async def analyze_item(item) :
     parseResult = ani.parse(item.title)
+    if parseResult is None :
+        return
     should_skip, now_language = should_skip_item(parseResult)
     if should_skip :
         return
