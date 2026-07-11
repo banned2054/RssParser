@@ -1,13 +1,6 @@
 import re
 
-from pyaniparser import AniParser
-
 from app import config
-from app.utils.log_utils import set_up_logger
-
-logger = set_up_logger(__name__)
-
-ani = AniParser()
 
 
 def clear_title(origin_title: str) -> str :
@@ -15,15 +8,15 @@ def clear_title(origin_title: str) -> str :
     result = re.sub("|".join(patterns), "", origin_title).strip()
 
     replace_dict = {
-        '【我推的孩子】 (2024) '          : '我推的孩子 第二季',
-        'Oshi no Ko (2024) '            : 'Oshi no Ko season2',
-        '【喵萌奶茶屋】'                  : '[喵萌奶茶屋]',
-        '  '                            : ' ',
-        '[WEB-DL]'                      : '',
-        '[AAC AVC]'                     : '',
-        '[WebRip 1080p HEVC-10bit AAC]' : '',
-        '[MP4]'                         : '',
-        '[WebRip]'                      : ''
+            '【我推的孩子】 (2024) '          : '我推的孩子 第二季',
+            'Oshi no Ko (2024) '            : 'Oshi no Ko season2',
+            '【喵萌奶茶屋】'                  : '[喵萌奶茶屋]',
+            '  '                            : ' ',
+            '[WEB-DL]'                      : '',
+            '[AAC AVC]'                     : '',
+            '[WebRip 1080p HEVC-10bit AAC]' : '',
+            '[MP4]'                         : '',
+            '[WebRip]'                      : ''
     }
 
     for old, new in replace_dict.items() :
