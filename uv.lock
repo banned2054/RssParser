@@ -634,15 +634,15 @@ wheels = [
 
 [[package]]
 name = "pyaniparser"
-version = "0.6.0"
+version = "0.6.1"
 source = { registry = "https://mirrors.aliyun.com/pypi/simple/" }
 wheels = [
-    { url = "https://mirrors.aliyun.com/pypi/packages/f6/6f/5e83e0447eaa710d9e3b59298f98726b9781a81c2d3c8043adf31b5950a7/pyaniparser-0.6.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:299d254012f84ed8bf493875ce0d8144d30e2d50f236530d5175bf04a15dcfa4" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/03/1f/ff742eeebdfe5b0a6524ca814378e7a3fcc6f66ab54b154b4c97e47dca2e/pyaniparser-0.6.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:fbea6a044c199e551e9c3dea5f76a4f93d8754dd6e91132bc08c425624abf833" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/39/ce/a9cca0ed36f547aefe21430c0810033f63249f6da8b4ce234cf58e443e70/pyaniparser-0.6.0-py3-none-manylinux_2_17_aarch64.whl", hash = "sha256:e51dc883ffa4e3f9ebd0a65546d31b0f2e645e6b3ad49b4a4a2ba3390419bec5" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/a3/4f/542fdee0568e83d362d753b60302034a0a02697072ebac8209abc4c0034e/pyaniparser-0.6.0-py3-none-manylinux_2_17_x86_64.whl", hash = "sha256:407bb234f02369d0ed0ec99b58cd838f42086acb81bf1c49985a183c19ce811e" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/be/56/c3c93a88281bfd98b3b72fe8a2f087963107c9e0918f3ad9f396caa36a2a/pyaniparser-0.6.0-py3-none-win_amd64.whl", hash = "sha256:4e71f4050e7bc521edd2106bdb0f121c118371cf282a3f6d3cd6ea46d1424e99" },
-    { url = "https://mirrors.aliyun.com/pypi/packages/df/46/4d83fe9a7ee81f540b0ed123b45fb472252dca9d3c48578a7d79002de014/pyaniparser-0.6.0-py3-none-win_arm64.whl", hash = "sha256:7bc7ba3b62fda14e5595b5ce088d777433985938eacfaf75704bc127ee5ca10f" },
+    { url = "https://mirrors.aliyun.com/pypi/packages/28/a7/bacb4844a10f984254f8b6f8dd3a3d7fc5ab16bc50c13321bc1bb705780d/pyaniparser-0.6.1-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:2f771f04c6baab1debb722f0d37c8649566d74db5a97c793a49fedf7d3452c33" },
+    { url = "https://mirrors.aliyun.com/pypi/packages/d5/1c/d4a6cb6e00bd92dd9d1ec3322be0b035e6bc24d287ac8e30fa1bb232b843/pyaniparser-0.6.1-py3-none-macosx_11_0_arm64.whl", hash = "sha256:a266fc7388bd29acb4163d33147415e1b7130427e9725e3ef8118ecb7b5408eb" },
+    { url = "https://mirrors.aliyun.com/pypi/packages/b0/25/959449e37b1bdf8e0a17cf35a353942b22a6ddb5830c06087f1b47ff317f/pyaniparser-0.6.1-py3-none-manylinux_2_17_aarch64.whl", hash = "sha256:bc9458d648989df0e5c90ca3818e0f3ef413f6622d5c8815c906a499c4298ad6" },
+    { url = "https://mirrors.aliyun.com/pypi/packages/f4/d3/3b1fb15b1684d45c971b2373dc9ba90720ea097c3f8a9a69a2c79721cce2/pyaniparser-0.6.1-py3-none-manylinux_2_17_x86_64.whl", hash = "sha256:9b170d6d5a4e49352609ce464fe1e6dd5c641a6ac16cbdf9b6049e13334c4793" },
+    { url = "https://mirrors.aliyun.com/pypi/packages/ae/1a/543f8c3d82df06deec5a144e75fe1ea57152f309ec36af313195fb36a4b2/pyaniparser-0.6.1-py3-none-win_amd64.whl", hash = "sha256:79f83926a9cd608914f65014e55a9d68286ebafbc9de45304d237195209fcba2" },
+    { url = "https://mirrors.aliyun.com/pypi/packages/9b/e0/a3a766e9f9f17fd68f27cb254855fdc765089429327c599a661b94949db0/pyaniparser-0.6.1-py3-none-win_arm64.whl", hash = "sha256:dab560cab9c0dff665e2531f626f4169ea8a949734a6c9d82a5e83a683f51618" },
 ]
 
 [[package]]
@@ -744,7 +744,7 @@ requires-dist = [
     { name = "cryptography", specifier = "==49.0.0" },
     { name = "feedparser", specifier = "==6.0.13" },
     { name = "gotify" },
-    { name = "pyaniparser", specifier = "==0.6.0" },
+    { name = "pyaniparser", specifier = "==0.6.1" },
     { name = "pymysql", specifier = "==1.2.0" },
     { name = "python-telegram-bot", specifier = "==22.8" },
     { name = "pytz", specifier = "==2026.3" },
